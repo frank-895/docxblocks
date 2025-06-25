@@ -5,12 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2025-01-27
+
+### Fixed
+- **Integer Values in Table Cells**: Fixed `.strip()` AttributeError when using integer values in table cells
+  - Convert values to strings before calling `.strip()` to handle non-string types
+  - Fixes both header and cell value processing in TableBuilder
+  - Maintains backward compatibility with existing string values
+  - Added comprehensive test coverage for integer values in tables
+
+### Technical Improvements
+- **Robust Type Handling**: Enhanced table cell processing to handle mixed data types
+- **Test Coverage**: Added `test_table_block_with_integers()` to verify fix works correctly
+- **Error Prevention**: Eliminates AttributeError when integer values are used in table data
+
+---
+
+## [1.0.4] - 2025-01-27 (Pre-release)
+
+### Fixed
+- **Integer Values in Table Cells**: Fixed `.strip()` AttributeError when using integer values in table cells
+  - Convert values to strings before calling `.strip()` to handle non-string types
+  - Fixes both header and cell value processing in TableBuilder
+  - Maintains backward compatibility with existing string values
+  - Added comprehensive test coverage for integer values in tables
+
+### Technical Improvements
+- **Robust Type Handling**: Enhanced table cell processing to handle mixed data types
+- **Test Coverage**: Added `test_table_block_with_integers()` to verify fix works correctly
+- **Error Prevention**: Eliminates AttributeError when integer values are used in table data
+
+---
+
 ## [1.0.3] - 2025-06-25
 
 ### Fixed
 - Updated tests to support new bullet point implementation (Word-native bullet formatting)
 - Ensured all tests pass for v1.0.2+ bullet improvements
-
 ---
 
 ## [1.0.2] - 2025-06-25
