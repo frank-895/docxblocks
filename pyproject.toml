@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "docxblocks"
+version = "0.1.0"
+description = "High-level block-based abstraction over python-docx for building dynamic Word documents in code."
+readme = "README.md"
+authors = [
+  { name = "Frank Snelling", email = "frank.snelling03@gmail.com" }
+]
+license = { text = "MIT" }
+keywords = ["docx", "python-docx", "word", "reporting", "template", "automation"]
+dependencies = [
+  "python-docx>=0.8.11",
+  "Pillow>=10.0.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/frank-895/docxblocks"
+Repository = "https://github.com/frank-895/docxblocks"
