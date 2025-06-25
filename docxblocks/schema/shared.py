@@ -11,8 +11,10 @@ class TextStyle(BaseModel):
 class TableStyle(BaseModel):
     header_styles: Optional[dict] = None  # Dict[str, Any]
     column_styles: Optional[dict] = None  # Dict[int, Any]
+    row_styles: Optional[dict] = None     # Dict[int, Any] - styling by row index
     cell_styles: Optional[dict] = None    # Dict[Tuple[int, int], Any]
-    column_widths: Optional[list] = None  # List[float]
+    column_widths: Optional[list] = None  # List[float] - width fractions for columns
+    row_widths: Optional[list] = None     # List[float] - height fractions for rows
 
 class ImageStyle(BaseModel):
     max_width: Optional[str] = None   # E.g. "4in", "300px"
