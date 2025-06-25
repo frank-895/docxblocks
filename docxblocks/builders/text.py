@@ -15,14 +15,15 @@ class TextBuilder:
     """
     Builder class for rendering text blocks in Word documents.
     
-    This builder handles plain text content with optional styling. It supports
-    multi-line text by splitting on newlines and creating separate paragraphs
-    for each line. Empty text is replaced with a consistent placeholder.
+    This builder handles plain text content with optional styling. By default,
+    text blocks are inline (added to the current paragraph). Only when new_paragraph
+    is True will a new paragraph be created.
     
     Attributes:
         doc: The python-docx Document object
         parent: The parent XML element where content will be inserted
         index: The insertion index within the parent element
+        current_paragraph: The current paragraph for inline text (if any)
     """
     
     def __init__(self, doc, parent, index):
@@ -37,33 +38,57 @@ class TextBuilder:
         self.doc = doc
         self.parent = parent
         self.index = index
+        self.current_paragraph = None
 
     def build(self, block: TextBlock):
         """
         Build and render a text block in the document.
         
         This method processes the text block, handles empty values with placeholders,
-        splits multi-line text, and applies styling to each paragraph.
+        and either adds text to the current paragraph (inline) or creates a new paragraph.
         
         Args:
             block: A validated TextBlock object containing text content and styling
         """
         # Handle empty text with placeholder
-        text = block.text.strip() if block.text else DEFAULT_EMPTY_VALUE_TEXT
-        lines = text.split("\n")
+        text = block.text if block.text else DEFAULT_EMPTY_VALUE_TEXT
         
-        for line in lines:
-            para = self.doc.add_paragraph(
-                style=block.style.style if block.style and block.style.style else "Normal"
-            )
-            run = para.add_run(line)
+        if not block.new_paragraph:
+            # Add to current paragraph or create new one if none exists
+            if self.current_paragraph is None:
+                self.current_paragraph = self.doc.add_paragraph(
+                    style=block.style.style if block.style and block.style.style else "Normal"
+                )
+                self.parent.insert(self.index, self.current_paragraph._element)
+                self.index += 1
+            
+            # Add text as a run to the current paragraph
+            run = self.current_paragraph.add_run(text)
             
             # Apply block style, but override with placeholder style if text is empty
             if not block.text or not block.text.strip():
                 apply_style_to_run(run, TextStyle(**DEFAULT_EMPTY_VALUE_STYLE))
             else:
                 apply_style_to_run(run, block.style)
+        else:
+            # Reset current paragraph for new paragraph text
+            self.current_paragraph = None
+            
+            # Handle multi-line text for new paragraphs
+            lines = text.split("\n")
+            
+            for line in lines:
+                para = self.doc.add_paragraph(
+                    style=block.style.style if block.style and block.style.style else "Normal"
+                )
+                run = para.add_run(line)
                 
-            set_paragraph_alignment(para, block.style.align if block.style else None)
-            self.parent.insert(self.index, para._element)
-            self.index += 1 
+                # Apply block style, but override with placeholder style if text is empty
+                if not block.text or not block.text.strip():
+                    apply_style_to_run(run, TextStyle(**DEFAULT_EMPTY_VALUE_STYLE))
+                else:
+                    apply_style_to_run(run, block.style)
+                    
+                set_paragraph_alignment(para, block.style.align if block.style else None)
+                self.parent.insert(self.index, para._element)
+                self.index += 1 

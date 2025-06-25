@@ -28,6 +28,7 @@ class RichTextBuilder:
         doc: The python-docx Document object
         parent: The parent XML element where content will be inserted
         index: The insertion index within the parent element
+        text_builder: Shared TextBuilder instance for handling inline text
     """
     
     def __init__(self, doc, parent, index):
@@ -42,6 +43,7 @@ class RichTextBuilder:
         self.doc = doc
         self.parent = parent
         self.index = index
+        self.text_builder = None
 
     def render(self, blocks: list):
         """
@@ -88,10 +90,13 @@ class RichTextBuilder:
         Args:
             block: A validated TextBlock object
         """
-        builder = TextBuilder(self.doc, self.parent, self.index)
-        builder.build(block)
+        # Create text builder if it doesn't exist or if this is a new paragraph block
+        if self.text_builder is None or block.new_paragraph:
+            self.text_builder = TextBuilder(self.doc, self.parent, self.index)
+        
+        self.text_builder.build(block)
         # Update index based on how many paragraphs were added
-        self.index = builder.index
+        self.index = self.text_builder.index
 
     def _render_heading(self, block: HeadingBlock):
         """
@@ -100,6 +105,9 @@ class RichTextBuilder:
         Args:
             block: A validated HeadingBlock object
         """
+        # Reset text builder when we encounter a non-text block
+        self.text_builder = None
+        
         builder = HeadingBuilder(self.doc, self.parent, self.index)
         builder.build(block)
         # Update index based on how many paragraphs were added
@@ -112,6 +120,9 @@ class RichTextBuilder:
         Args:
             block: A validated BulletBlock object
         """
+        # Reset text builder when we encounter a non-text block
+        self.text_builder = None
+        
         builder = BulletBuilder(self.doc, self.parent, self.index)
         builder.build(block)
         # Update index based on how many paragraphs were added
@@ -124,6 +135,9 @@ class RichTextBuilder:
         Args:
             block: A validated TableBlock object
         """
+        # Reset text builder when we encounter a non-text block
+        self.text_builder = None
+        
         TableBuilder.build(
             self.doc,
             placeholder=None,
@@ -141,6 +155,9 @@ class RichTextBuilder:
         Args:
             block: A validated ImageBlock object
         """
+        # Reset text builder when we encounter a non-text block
+        self.text_builder = None
+        
         ImageBuilder.build(
             self.doc,
             placeholder=None,
