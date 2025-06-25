@@ -12,6 +12,7 @@ class TextBlock(BaseBlock):
     type: Literal["text"]
     text: str = Field(..., description="Text content - can be empty string")
     style: Optional[TextStyle] = None
+    new_paragraph: Optional[bool] = Field(default=False, description="If True, text will start a new paragraph. If False (default), text will be inline with previous text")
 
 
 class HeadingBlock(BaseBlock):
