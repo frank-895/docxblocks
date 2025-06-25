@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 2025-06-25
+
+### Fixed
+- **Bullet Point Reliability**: Completely rewrote bullet point implementation to use Word's native bullet formatting
+  - Replaced manual bullet character insertion with proper Word bullet styles
+  - Added multi-layer fallback system for maximum compatibility
+  - No longer requires users to add custom styles to their Word templates
+  - Works consistently across different Word versions and environments
+
+### Technical Improvements
+- **Robust Bullet Builder**: Implemented three-tier fallback strategy:
+  1. Primary: Uses Word's built-in "List Bullet" style
+  2. Fallback: Creates custom bullet style programmatically with proper indentation
+  3. Final: Manual bullet character insertion if all else fails
+- **Self-Contained Library**: Eliminated dependency on external Word template styles
+- **Cross-Platform Compatibility**: Enhanced reliability across different Word environments
+
+---
+
 ## [1.0.0] - 2025-06-25
 
 ### Added
