@@ -10,6 +10,7 @@ from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docxblocks.constants import DEFAULT_EMPTY_VALUE_TEXT, DEFAULT_EMPTY_VALUE_STYLE
+from docxblocks.utils.styles import set_paragraph_alignment
 
 
 class TableBuilder:
@@ -172,7 +173,7 @@ def _apply_cell_style(cell, para, run, styles):
             - font_color: Font color as hex string
     """
     if styles.get("align"):
-        _set_paragraph_alignment(para, styles["align"])
+        set_paragraph_alignment(para, styles["align"])
     if styles.get("bold"):
         run.font.bold = True
     if styles.get("bg_color"):
@@ -192,20 +193,3 @@ def _set_cell_bg_color(cell, hex_color):
     cell_xml = cell._tc
     props = cell_xml.get_or_add_tcPr()
     props.append(parse_xml(f'<w:shd {nsdecls("w")} w:fill="{hex_color}"/>'))
-
-
-def _set_paragraph_alignment(paragraph, align):
-    """
-    Set the alignment of a paragraph.
-    
-    Args:
-        paragraph: The paragraph element
-        align: Alignment string ("left", "center", "right")
-    """
-    alignment_map = {
-        "left": WD_ALIGN_PARAGRAPH.LEFT,
-        "center": WD_ALIGN_PARAGRAPH.CENTER,
-        "right": WD_ALIGN_PARAGRAPH.RIGHT,
-    }
-    if align in alignment_map:
-        paragraph.alignment = alignment_map[align]

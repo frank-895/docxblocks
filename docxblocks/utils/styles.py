@@ -14,7 +14,14 @@ def apply_style_to_run(run, style):
         font.color.rgb = RGBColor.from_string(style.font_color)
 
 def set_paragraph_alignment(paragraph, align):
-    """Set paragraph alignment based on string."""
+    """
+    Set paragraph alignment based on string.
+
+    This is the canonical alignment setter for all block types (table cells, rows, columns, tables, headings, text, etc).
+    Args:
+        paragraph: The python-docx Paragraph object to align.
+        align: One of 'left', 'center', or 'right'.
+    """
     align_map = {
         "left": WD_ALIGN_PARAGRAPH.LEFT,
         "center": WD_ALIGN_PARAGRAPH.CENTER,
