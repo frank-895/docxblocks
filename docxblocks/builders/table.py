@@ -53,6 +53,9 @@ class TableBuilder:
         if parent is None or index is None:
             return
 
+        # Ensure style_kwargs is always a dictionary
+        style_kwargs = style_kwargs or {}
+
         # Handle empty content with placeholder
         if not content:
             para = doc.add_paragraph(DEFAULT_EMPTY_VALUE_TEXT)
@@ -114,7 +117,7 @@ class TableBuilder:
                     if DEFAULT_EMPTY_VALUE_STYLE.get("font_color"):
                         run.font.color.rgb = RGBColor.from_string(DEFAULT_EMPTY_VALUE_STYLE["font_color"])
 
-                header_styles = style_kwargs.get("header_styles", {})
+                header_styles = style_kwargs.get("header_styles") or {}
                 _apply_cell_style(cell, para, run, header_styles)
 
         for row_idx, row_data in enumerate(rows):
@@ -141,15 +144,15 @@ class TableBuilder:
                         run.font.color.rgb = RGBColor.from_string(DEFAULT_EMPTY_VALUE_STYLE["font_color"])
 
                 # Apply column styles
-                col_styles = style_kwargs.get("column_styles", {}).get(col_idx, {})
+                col_styles = (style_kwargs.get("column_styles") or {}).get(col_idx, {})
                 _apply_cell_style(cell, para, run, col_styles)
 
                 # Apply row styles
-                row_styles = style_kwargs.get("row_styles", {}).get(row_idx, {})
+                row_styles = (style_kwargs.get("row_styles") or {}).get(row_idx, {})
                 _apply_cell_style(cell, para, run, row_styles)
 
                 # Apply cell-specific styles (highest priority)
-                cell_styles = style_kwargs.get("cell_styles", {}).get((row_idx, col_idx), {})
+                cell_styles = (style_kwargs.get("cell_styles") or {}).get((row_idx, col_idx), {})
                 _apply_cell_style(cell, para, run, cell_styles)
 
         parent.insert(index, table._element)

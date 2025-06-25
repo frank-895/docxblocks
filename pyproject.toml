@@ -18,6 +18,9 @@ dependencies = [
   "pydantic>=2.0.0"
 ]
 
+[tool.poetry.dev-dependencies]
+pytest = ">=7.0.0"
+
 [project.urls]
 Homepage = "https://github.com/frank-895/docxblocks"
 Repository = "https://github.com/frank-895/docxblocks"

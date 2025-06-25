@@ -84,5 +84,51 @@ builder.save("output.docx")
 - Declarative, JSON-like format ideal for automation and templating
 - Built for dynamic, testable, repeatable reports
 
+## 🧪 Development
+
+### Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/frank-895/docxblocks.git
+cd docxblocks
+
+# Run the development setup script
+./scripts/setup_dev.sh
+```
+
+### Testing
+
+```bash
+# Run all tests
+PYTHONPATH=. pytest tests
+
+# Run tests with verbose output
+PYTHONPATH=. pytest tests -v
+
+# Run specific test file
+PYTHONPATH=. pytest tests/test_text_block.py
+```
+
+### Examples
+
+```bash
+# Run individual examples
+cd examples
+python text_block_example.py
+python table_block_example.py
+python image_block_example.py
+python combined_example.py
+```
+
+### Continuous Integration
+
+GitHub Actions automatically runs tests on:
+- Every push to `main` and `develop` branches
+- Every pull request to `main`
+- Multiple Python versions (3.9, 3.10, 3.11)
+
+**Note:** Tests run automatically in CI, so you can push your changes and see the results on GitHub.
+
 ## 📄 License
 MIT - [LICENSE](LICENSE) 

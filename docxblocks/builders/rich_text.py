@@ -130,7 +130,7 @@ class RichTextBuilder:
             content=block.content,
             parent=self.parent,
             index=self.index,
-            **(block.style.dict() if block.style else {})
+            **(block.style.model_dump() if block.style else {})
         )
         self.index += 1
 
@@ -147,6 +147,6 @@ class RichTextBuilder:
             image_path=block.path,
             parent=self.parent,
             index=self.index,
-            **(block.style.dict() if block.style else {})
+            **(block.style.model_dump() if block.style else {})
         )
         self.index += 1
