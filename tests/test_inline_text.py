@@ -78,4 +78,31 @@ def test_mixed_inline_and_paragraphs(tmp_path):
     assert "Summary" in paragraphs[1]
     
     # Third paragraph should contain inline summary text
-    assert "This is a summary of the report." in paragraphs[2] 
+    assert "This is a summary of the report." in paragraphs[2]
+
+def test_inline_after_new_paragraph(tmp_path):
+    """Test that inline text works correctly after a new_paragraph block"""
+    template = tmp_path / "template.docx"
+    output = tmp_path / "output.docx"
+    doc = Document()
+    doc.add_paragraph("{{main}}")
+    doc.save(str(template))
+
+    blocks = [
+        {"type": "text", "text": "Participant No: ", "style": {"bold": True}, "new_paragraph": True},
+        {"type": "text", "text": "12345", "style": {"bold": True}},
+    ]
+    
+    builder = DocxBuilder(str(template))
+    builder.insert("{{main}}", blocks)
+    builder.save(str(output))
+
+    assert os.path.exists(output)
+    doc2 = Document(str(output))
+    
+    # Should have only 1 paragraph with both pieces of text
+    paragraphs = [p.text for p in doc2.paragraphs if p.text.strip()]
+    assert len(paragraphs) == 1
+    
+    # The paragraph should contain both pieces of text
+    assert "Participant No: 12345" in paragraphs[0] 

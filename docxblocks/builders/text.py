@@ -71,13 +71,9 @@ class TextBuilder:
             else:
                 apply_style_to_run(run, block.style)
         else:
-            # Reset current paragraph for new paragraph text
-            self.current_paragraph = None
-            
-            # Handle multi-line text for new paragraphs
+            # If text contains newlines, create a paragraph for each line
             lines = text.split("\n")
-            
-            for line in lines:
+            for i, line in enumerate(lines):
                 para = self.doc.add_paragraph(
                     style=block.style.style if block.style and block.style.style else "Normal"
                 )
@@ -88,7 +84,8 @@ class TextBuilder:
                     apply_style_to_run(run, TextStyle(**DEFAULT_EMPTY_VALUE_STYLE))
                 else:
                     apply_style_to_run(run, block.style)
-                    
+                
                 set_paragraph_alignment(para, block.style.align if block.style else None)
                 self.parent.insert(self.index, para._element)
-                self.index += 1 
+                self.index += 1
+                self.current_paragraph = para 
