@@ -8,7 +8,7 @@ Unlike templating libraries like `docxtpl`, `docxblocks` keeps **all logic in Py
 
 ## ✨ Key Features
 
-- Block types: `text`, `heading`, `table`, `bullets`, `image`
+- Block types: `text`, `heading`, `table`, `bullets`, `image`, `page_break`
 - **Inline text by default** - consecutive text blocks stay on the same line
 - Style control via consistent `style` dictionaries
 - Graceful fallback for missing data
@@ -83,30 +83,15 @@ Each piece of content is a block:
 
 Block types:
 
-| Type      | Required Keys     | Optional Keys     |
-|-----------|-------------------|-------------------|
-| `text`    | `text`            | `new_paragraph`   | 
-| `heading` | `text`, `level`   |                   |
-| `table`   | `content`         |                   | 
-| `image`   | `path`            |                   |
-| `bullets` | `items` (list)    |                   |
+| Type         | Required Keys     | Optional Keys     |
+|--------------|-------------------|-------------------|
+| `text`       | `text`            | `new_paragraph`   | 
+| `heading`    | `text`, `level`   |                   |
+| `table`      | `content`         |                   | 
+| `image`      | `path`            |                   |
+| `bullets`    | `items` (list)    |                   |
+| `page_break` | (none)            |                   |
 
-### 📝 Inline Text
-
-Text blocks are **inline by default** - they continue on the same line as previous text blocks:
-
-```python
-blocks = [
-    {"type": "text", "text": "Participant Name: "},
-    {"type": "text", "text": "John Doe", "style": {"bold": True}},
-    {"type": "text", "text": " (ID: "},
-    {"type": "text", "text": "12345", "style": {"font_color": "007700"}},
-    {"type": "text", "text": ")"},
-    {"type": "text", "text": "New paragraph starts here", "new_paragraph": True},
-]
-```
-
-Use `"new_paragraph": true` to force a new paragraph.
 
 ## 🧪 Example
 
@@ -128,6 +113,7 @@ builder.insert("{{main}}", [
             "column_widths": [0.5, 0.5]
         }
     },
+    {"type": "page_break"},
     {"type": "image", "path": "chart.png", "style": {"max_width": "4in"}}
 ])
 builder.save("output.docx")
@@ -178,6 +164,7 @@ python table_block_example.py
 python image_block_example.py
 python combined_example.py
 python inline_text_example.py  # New inline text example
+python page_break_example.py   # New page break example
 ```
 
 ### Continuous Integration
