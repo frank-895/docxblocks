@@ -106,13 +106,14 @@ class TableBuilder:
             for i, header_text in enumerate(headers):
                 cell = row[i]
                 para = cell.paragraphs[0]
-                # Handle empty header text
-                header_display = header_text.strip() if header_text else DEFAULT_EMPTY_VALUE_TEXT
+                # Handle empty header text - convert to string first to avoid .strip() on integers
+                header_str = str(header_text) if header_text is not None else ""
+                header_display = header_str.strip() if header_str else DEFAULT_EMPTY_VALUE_TEXT
                 run = para.add_run(str(header_display))
                 run.font.bold = True
 
                 # Apply placeholder style if header is empty
-                if not header_text or not header_text.strip():
+                if not header_text or not header_str.strip():
                     run.font.bold = DEFAULT_EMPTY_VALUE_STYLE.get("bold", True)
                     if DEFAULT_EMPTY_VALUE_STYLE.get("font_color"):
                         run.font.color.rgb = RGBColor.from_string(DEFAULT_EMPTY_VALUE_STYLE["font_color"])
@@ -132,13 +133,14 @@ class TableBuilder:
             for col_idx, cell_val in enumerate(row_data):
                 cell = cells[col_idx]
                 para = cell.paragraphs[0]
-                # Handle empty cell value
-                cell_display = cell_val.strip() if cell_val else DEFAULT_EMPTY_VALUE_TEXT
+                # Handle empty cell value - convert to string first to avoid .strip() on integers
+                cell_str = str(cell_val) if cell_val is not None else ""
+                cell_display = cell_str.strip() if cell_str else DEFAULT_EMPTY_VALUE_TEXT
                 run = para.add_run(str(cell_display))
                 run.font.bold = False
 
                 # Apply placeholder style if cell is empty
-                if not cell_val or not cell_val.strip():
+                if not cell_val or not cell_str.strip():
                     run.font.bold = DEFAULT_EMPTY_VALUE_STYLE.get("bold", True)
                     if DEFAULT_EMPTY_VALUE_STYLE.get("font_color"):
                         run.font.color.rgb = RGBColor.from_string(DEFAULT_EMPTY_VALUE_STYLE["font_color"])
