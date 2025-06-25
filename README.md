@@ -9,6 +9,7 @@ Unlike templating libraries like `docxtpl`, `docxblocks` keeps **all logic in Py
 ## ✨ Key Features
 
 - Block types: `text`, `heading`, `table`, `bullets`, `image`
+- **Inline text by default** - consecutive text blocks stay on the same line
 - Style control via consistent `style` dictionaries
 - Graceful fallback for missing data
 - Declarative, testable, version-controlled
@@ -20,7 +21,47 @@ Unlike templating libraries like `docxtpl`, `docxblocks` keeps **all logic in Py
 pip install docxblocks
 ```
 
-📘 **See the [Style Guide](STYLE_GUIDE.md)** for all supported style keys, color formats, and alignment options.
+📘 **See the [Style Guide](STYLEGUIDE.md)** for all supported style keys, color formats, and alignment options.
+
+## 📄 Creating Word Templates
+
+### **Important: Placeholder Requirements**
+
+Each placeholder **MUST be in its own paragraph**. This is crucial for proper document generation.
+
+#### ✅ **Correct Template Structure:**
+```
+Paragraph 1: {{main}}
+Paragraph 2: (empty or other content)
+Paragraph 3: {{header}}
+```
+
+#### ❌ **Incorrect Template Structure:**
+```
+Paragraph 1: Some text {{main}} more text
+Paragraph 2: {{header}} and other content
+```
+
+### **How to Create Templates:**
+
+1. **Open Microsoft Word** and create a new document
+2. **Add placeholders** by typing them in separate paragraphs:
+   - Type `{{main}}` and press Enter
+   - Type `{{header}}` and press Enter
+   - Each placeholder gets its own paragraph
+3. **Save as `.docx`** format
+4. **Use in your code** with `DocxBuilder("template.docx")`
+
+### **Template Example:**
+```
+Document Title
+
+{{header}}
+
+{{main}}
+
+{{footer}}
+```
 
 ## 🧱 Block-Based API (Core Concept)
 
@@ -42,13 +83,30 @@ Each piece of content is a block:
 
 Block types:
 
-| Type      | Required Keys     |
-|-----------|-------------------|
-| `text`    | `text`            | 
-| `heading` | `text`, `level`   |
-| `table`   | `content`         | 
-| `image`   | `path`            |
-| `bullets` | `items` (list)    |
+| Type      | Required Keys     | Optional Keys     |
+|-----------|-------------------|-------------------|
+| `text`    | `text`            | `new_paragraph`   | 
+| `heading` | `text`, `level`   |                   |
+| `table`   | `content`         |                   | 
+| `image`   | `path`            |                   |
+| `bullets` | `items` (list)    |                   |
+
+### 📝 Inline Text
+
+Text blocks are **inline by default** - they continue on the same line as previous text blocks:
+
+```python
+blocks = [
+    {"type": "text", "text": "Participant Name: "},
+    {"type": "text", "text": "John Doe", "style": {"bold": True}},
+    {"type": "text", "text": " (ID: "},
+    {"type": "text", "text": "12345", "style": {"font_color": "007700"}},
+    {"type": "text", "text": ")"},
+    {"type": "text", "text": "New paragraph starts here", "new_paragraph": True},
+]
+```
+
+Use `"new_paragraph": true` to force a new paragraph.
 
 ## 🧪 Example
 
@@ -119,6 +177,7 @@ python text_block_example.py
 python table_block_example.py
 python image_block_example.py
 python combined_example.py
+python inline_text_example.py  # New inline text example
 ```
 
 ### Continuous Integration
