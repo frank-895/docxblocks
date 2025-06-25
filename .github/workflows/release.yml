@@ -11,6 +11,9 @@ jobs:
     environment:
       name: pypi
       url: https://pypi.org/p/docxblocks
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
