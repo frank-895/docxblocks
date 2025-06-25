@@ -93,8 +93,8 @@ class RichTextBuilder:
         Args:
             block: A validated TextBlock object
         """
-        # Create text builder if it doesn't exist or if this is a new paragraph block
-        if self.text_builder is None or block.new_paragraph:
+        # Create text builder if it doesn't exist
+        if self.text_builder is None:
             self.text_builder = TextBuilder(self.doc, self.parent, self.index)
         
         self.text_builder.build(block)
