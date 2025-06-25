@@ -40,4 +40,9 @@ class ImageBlock(BaseBlock):
     style: Optional[ImageStyle] = None
 
 
-Block = Union[TextBlock, HeadingBlock, BulletBlock, TableBlock, ImageBlock]
+class PageBreakBlock(BaseBlock):
+    type: Literal["page_break"]
+    # No additional fields needed for a simple page break
+
+
+Block = Union[TextBlock, HeadingBlock, BulletBlock, TableBlock, ImageBlock, PageBreakBlock]

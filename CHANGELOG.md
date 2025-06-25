@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-01-27
+
+### Added
+- **Page Break Blocks**: New `page_break` block type for creating multi-page documents
+  - Simple `{"type": "page_break"}` syntax
+  - Creates proper Word page breaks using `WD_BREAK.PAGE`
+  - Works seamlessly with all other block types
+  - Perfect for reports, manuals, and multi-page documents
+
+### Technical Improvements
+- **PageBreakBuilder**: New builder class for handling page break blocks
+- **Enhanced RichTextBuilder**: Added support for page break validation and rendering
+- **Comprehensive Testing**: Added test suite for page break functionality including inline text integration
+
+### Documentation
+- Updated README with page break examples and documentation
+- Added new example script (`page_break_example.py`) demonstrating multi-page document creation
+- Updated block type table to include `page_break` type
+
+---
+
 ## [1.1.0] - 2025-06-25
 
 ### Added
@@ -63,6 +84,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Robust Type Handling**: Enhanced table cell processing to handle mixed data types
 - **Test Coverage**: Added `test_table_block_with_integers()` to verify fix works correctly
 - **Error Prevention**: Eliminates AttributeError when integer values are used in table data
+
 ---
 
 ## [1.0.3] - 2025-06-25
@@ -70,6 +92,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Updated tests to support new bullet point implementation (Word-native bullet formatting)
 - Ensured all tests pass for v1.0.2+ bullet improvements
+
 ---
 
 ## [1.0.2] - 2025-06-25
