@@ -26,5 +26,10 @@ def test_combined(tmp_path):
     texts = [p.text for p in doc2.paragraphs]
     assert any("Title" in t for t in texts)
     assert any("Summary" in t for t in texts)
-    assert any("•" in t for t in texts)
+    # Check for bullet items' text
+    for bullet_item in ["A", "B", "C"]:
+        assert any(bullet_item == t.strip() for t in texts)
+    # Check for bullet paragraph style (Word-native bullets)
+    bullet_styles = [p.style.name for p in doc2.paragraphs if p.text.strip() in ["A", "B", "C"] and p.style is not None]
+    assert any(s in ("List Bullet", "DocxBlocks_Bullet") for s in bullet_styles)
     assert len(doc2.tables) == 1 
