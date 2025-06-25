@@ -27,21 +27,17 @@ def test_inline_text_default(tmp_path):
     assert os.path.exists(output)
     doc2 = Document(str(output))
     
-    # Should have 3 paragraphs: inline text, new paragraph text, inline text
+    # Should have 2 paragraphs: inline text, new paragraph text + inline text
     paragraphs = [p.text for p in doc2.paragraphs if p.text.strip()]
-    assert len(paragraphs) == 3
+    assert len(paragraphs) == 2
     
     # First paragraph should contain all the inline text
     first_para = paragraphs[0]
     assert "Participant Name: John Doe (ID: 12345)" in first_para
     
-    # Second paragraph should contain the new paragraph text
+    # Second paragraph should contain the new paragraph text and the inline text after it
     second_para = paragraphs[1]
-    assert "New line starts here" in second_para
-    
-    # Third paragraph should contain the inline text after new paragraph
-    third_para = paragraphs[2]
-    assert "This should be on the same line as above" in third_para
+    assert "New line starts hereThis should be on the same line as above" in second_para
 
 def test_mixed_inline_and_paragraphs(tmp_path):
     """Test mixing inline text with other block types"""
