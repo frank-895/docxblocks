@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.4] - 2024-06-18
+
+### Changed
+- Major simplification of text block and newline handling:
+  - Every `\n` starts a new paragraph
+  - Consecutive text blocks without `\n` are grouped inline
+  - Empty text gets placeholder text
+- Removed complex state tracking from TextBuilder
+- All tests, documentation, and examples updated to match new logic
+- Improved maintainability and clarity throughout the codebase
+
 ## [1.3.3] - 2025-06-26
 
 ### Changed
