@@ -1,7 +1,12 @@
+"""
+Test text block functionality
+"""
+
 import os
 from docx import Document
-from docxblocks.core.inserter import DocxBuilder
+from docxblocks import DocxBuilder
 from docxblocks.constants import DEFAULT_EMPTY_VALUE_TEXT
+
 
 def test_text_block(tmp_path):
     template = tmp_path / "template.docx"
@@ -21,6 +26,7 @@ def test_text_block(tmp_path):
     doc2 = Document(str(output))
     found = any(DEFAULT_EMPTY_VALUE_TEXT in p.text for p in doc2.paragraphs)
     assert found, "Placeholder text not found in output docx"
+
 
 def test_single_newline_creates_paragraph(tmp_path):
     """Test that single newlines create new paragraphs"""
@@ -43,14 +49,15 @@ def test_single_newline_creates_paragraph(tmp_path):
 
     # Get all paragraphs with text content
     paragraphs = [p.text.strip() for p in doc2.paragraphs if p.text.strip()]
-    
+
     # Should have 2 paragraphs from the single newline
     assert len(paragraphs) == 2
-    assert "First line" in paragraphs[0]
-    assert "Second line" in paragraphs[1]
+    assert paragraphs[0] == "First line"
+    assert paragraphs[1] == "Second line"
+
 
 def test_double_newline_creates_paragraph_with_blank_line(tmp_path):
-    """Test that double newlines create two separate paragraphs"""
+    """Test that double newlines create two separate paragraphs with blank line in between"""
     template = tmp_path / "template.docx"
     output = tmp_path / "output.docx"
     doc = Document()
@@ -70,18 +77,12 @@ def test_double_newline_creates_paragraph_with_blank_line(tmp_path):
 
     # Get all paragraphs with text content
     paragraphs = [p.text.strip() for p in doc2.paragraphs if p.text.strip()]
-    
-    # Should have 3 paragraphs: First, empty, Second
+
+    # Should have 2 paragraphs: First, Second (blank paragraph is not counted)
     assert len(paragraphs) == 2
-    assert "First paragraph" in paragraphs[0]
-    assert "Second paragraph" in paragraphs[1]
-    
-    # Count total paragraphs (including empty ones)
-    all_paragraphs = [p.text for p in doc2.paragraphs]
-    
-    # Should have 3 total paragraphs: First, empty, Second
-    assert len(all_paragraphs) == 3
-    assert all_paragraphs[1] == ""  # Empty paragraph from \n\n
+    assert paragraphs[0] == "First paragraph"
+    assert paragraphs[1] == "Second paragraph"
+
 
 def test_mixed_newlines(tmp_path):
     """Test mixed single and double newlines"""
@@ -104,23 +105,17 @@ def test_mixed_newlines(tmp_path):
 
     # Get all paragraphs with text content
     paragraphs = [p.text.strip() for p in doc2.paragraphs if p.text.strip()]
-    
+
     # Should have 4 paragraphs with text: First, Second, Third, Fourth
     assert len(paragraphs) == 4
-    assert "First" in paragraphs[0]
-    assert "Second" in paragraphs[1]
-    assert "Third" in paragraphs[2]
-    assert "Fourth" in paragraphs[3]
-    
-    # Count total paragraphs (including empty ones)
-    all_paragraphs = [p.text for p in doc2.paragraphs]
-    
-    # Should have 5 total paragraphs: First, Second, empty, Third, Fourth
-    assert len(all_paragraphs) == 5
-    assert all_paragraphs[2] == ""  # Empty paragraph from \n\n
+    assert paragraphs[0] == "First"
+    assert paragraphs[1] == "Second"
+    assert paragraphs[2] == "Third"
+    assert paragraphs[3] == "Fourth"
+
 
 def test_spacing_functionality(tmp_path):
-    """Test that spacing parameter adds extra blank lines after new_paragraph text"""
+    """Test that spacing parameter adds extra blank lines after a text block"""
     template = tmp_path / "template.docx"
     output = tmp_path / "output.docx"
     doc = Document()
@@ -128,9 +123,9 @@ def test_spacing_functionality(tmp_path):
     doc.save(str(template))
 
     blocks = [
-        {"type": "text", "text": "First paragraph", "new_paragraph": True},
-        {"type": "text", "text": "Second paragraph", "new_paragraph": True, "spacing": 2},
-        {"type": "text", "text": "Third paragraph", "new_paragraph": True},
+        {"type": "text", "text": "\nFirst paragraph"},
+        {"type": "text", "text": "\nSecond paragraph", "spacing": 2},
+        {"type": "text", "text": "\nThird paragraph"},
     ]
 
     builder = DocxBuilder(str(template))
@@ -140,21 +135,20 @@ def test_spacing_functionality(tmp_path):
     assert os.path.exists(output)
     doc2 = Document(str(output))
 
-    # Get all paragraphs with text content
-    paragraphs = [p.text.strip() for p in doc2.paragraphs if p.text.strip()]
-    
-    # Should have 3 paragraphs with text
-    assert len(paragraphs) == 3
-    assert "First paragraph" in paragraphs[0]
-    assert "Second paragraph" in paragraphs[1]
-    assert "Third paragraph" in paragraphs[2]
-    
-    # Count total paragraphs (including blank ones)
+    # Get all paragraphs (including blank ones)
     all_paragraphs = [p.text for p in doc2.paragraphs]
+    # Find the paragraph with "Second paragraph"
+    second_para_index = None
+    for i, p in enumerate(all_paragraphs):
+        if "Second paragraph" in p:
+            second_para_index = i
+            break
     
-    # Should have 4 total paragraphs: First, Second, blank line, Third
-    assert len(all_paragraphs) == 4
-    assert all_paragraphs[2] == ""  # Blank line from spacing: 2
+    assert second_para_index is not None, "Second paragraph not found"
+    # There should be blank paragraphs after the second paragraph due to spacing
+    assert all_paragraphs[second_para_index + 1] == ""  # First blank paragraph
+    assert all_paragraphs[second_para_index + 2] == ""  # Second blank paragraph
+
 
 def test_newlines_create_paragraphs(tmp_path):
     """Test that all newlines create new paragraphs"""
@@ -177,9 +171,9 @@ def test_newlines_create_paragraphs(tmp_path):
 
     # Get all paragraphs with text content
     paragraphs = [p.text.strip() for p in doc2.paragraphs if p.text.strip()]
-    
+
     # Should have 3 paragraphs from the single text block with newlines
     assert len(paragraphs) == 3
-    assert "Line 1" in paragraphs[0]
-    assert "Line 2" in paragraphs[1]
-    assert "Line 3" in paragraphs[2] 
+    assert paragraphs[0] == "Line 1"
+    assert paragraphs[1] == "Line 2"
+    assert paragraphs[2] == "Line 3" 

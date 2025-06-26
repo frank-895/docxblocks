@@ -1,90 +1,124 @@
-# 🧶 docxblocks Style Guide
+# DocxBlocks Style Guide
 
-This document defines the supported styling options for each block type in the docxblocks system. It also documents how styles are applied, normalized, and rendered.
+This guide provides comprehensive documentation for styling and formatting options available in DocxBlocks.
 
-## 🎨 Shared Style Schema
+## Block Types
 
-All blocks that render text support a common style dictionary. This allows for consistent formatting across paragraphs, headings, bullet lists, tables, and more.
-
-## ✅ Supported Style Keys
-
-| Key           | Type    | Description                                      | Applies To                        | Applied On         |
-|---------------|---------|--------------------------------------------------|-----------------------------------|--------------------|
-| `bold`        | `bool`  | Renders text in bold                             | Text, Heading, Bullet, Table Cell | Run                |
-| `italic`      | `bool`  | Renders text in italics                          | Text, Heading, Bullet, Table Cell | Run                |
-| `font_color`  | `str`   | Hex color code (e.g. "FF0000")                   | Text, Heading, Bullet, Table Cell | Run (font color)   |
-| `align`       | `str`   | Paragraph alignment (left, center, right)         | Text, Heading, Bullet, Table Cell | Paragraph          |
-| `style`       | `str`   | Word paragraph style name (e.g. "Heading 1")      | Text, Heading, Bullet             | Paragraph          |
-| `bg_color`    | `str`   | Table cell background color in hex                | Table headers, Table cells        | Cell XML           |
-| `max_width`   | `str`   | Maximum image width (e.g. "4in", "300px")         | Image                             | Image size         |
-| `max_height`  | `str`   | Maximum image height (e.g. "3in", "200px")        | Image                             | Image size         |
-
-### Table-Specific Style Keys
-
-| Key            | Type         | Description                                      | Applies To         |
-|----------------|--------------|--------------------------------------------------|--------------------|
-| `header_styles`| `dict`       | Styles for all header cells                      | Table              |
-| `column_styles`| `dict`       | Styles for columns by index                      | Table              |
-| `row_styles`   | `dict`       | Styles for rows by index                         | Table              |
-| `cell_styles`  | `dict`       | Styles for specific cells by (row, col) tuple    | Table              |
-| `column_widths`| `list[float]`| Width fractions for columns (sum ≤ 1.0)          | Table              |
-| `row_widths`   | `list[float]`| Height fractions for rows (inches, EMUs)         | Table              |
-
-## 📐 Alignment Options
-
-- All alignment is set using the global utility `set_paragraph_alignment` from `docxblocks/utils/styles.py`.
-- This ensures consistent alignment for all block types (text, heading, bullet, table cell, etc.).
-
-| Value   | Meaning                |
-|---------|------------------------|
-| `left`  | Left-align paragraph   |
-| `center`| Center-align paragraph |
-| `right` | Right-align paragraph  |
-
-## 📦 Example Style Usage
-
+### Text Blocks
 ```python
 {
-  "type": "text",
-  "text": "Summary of findings",
-  "style": {
-    "bold": true,
-    "font_color": "444444",
-    "align": "center",
-    "style": "Normal"
-  }
-}
-
-{
-  "type": "table",
-  "content": {
-    "headers": ["Name", "Age", "City"],
-    "rows": [
-      ["Alice", "30", "London"],
-      ["Bob", "25", "Paris"]
-    ]
-  },
-  "style": {
-    "header_styles": {"bold": True, "bg_color": "E0E0E0"},
-    "column_styles": {0: {"bold": True}},
-    "row_styles": {1: {"bg_color": "FFF8DC"}},
-    "cell_styles": {(1, 2): {"font_color": "FF0000"}},
-    "column_widths": [0.4, 0.3, 0.3],
-    "row_widths": [0.5, 0.4, 0.4]
-  }
-}
-
-{
-  "type": "image",
-  "path": "images/chart.png",
-  "style": {
-    "max_width": "4in",
-    "max_height": "3in"
-  }
+    "type": "text",
+    "text": "Your text content here",
+    "style": {
+        "bold": True,
+        "italic": False,
+        "font_color": "FF0000",
+        "align": "center",
+        "style": "Normal"
+    },
+    "spacing": 2
 }
 ```
 
-## 🛠 Notes
+### Heading Blocks
+```python
+{
+    "type": "heading",
+    "text": "Your heading",
+    "level": 1,  # 1-6
+    "style": {
+        "bold": True,
+        "font_color": "0000FF",
+        "align": "left"
+    }
+}
+```
+
+### Bullet Lists
+```python
+{
+    "type": "bullets",
+    "items": ["Item 1", "Item 2", "Item 3"],
+    "style": {
+        "bold": False,
+        "font_color": "000000",
+        "align": "left"
+    }
+}
+```
+
+### Tables
+```python
+{
+    "type": "table",
+    "content": {
+        "headers": ["Header 1", "Header 2"],
+        "rows": [
+            ["Row 1 Col 1", "Row 1 Col 2"],
+            ["Row 2 Col 1", "Row 2 Col 2"]
+        ]
+    },
+    "style": {
+        "column_widths": [0.5, 0.5],
+        "header_styles": {"bold": True, "bg_color": "f2f2f2"},
+        "column_styles": {0: {"font_color": "FF0000"}},
+        "row_styles": {0: {"bg_color": "e6e6e6"}},
+        "cell_styles": {(0, 0): {"bold": True}}
+    }
+}
+```
+
+### Images
+```python
+{
+    "type": "image",
+    "path": "path/to/image.jpg",
+    "style": {
+        "max_width": "4in",
+        "max_height": "300px"
+    }
+}
+```
+
+### Page Breaks
+```python
+{
+    "type": "page_break"
+}
+```
+
+## Styling Options
+
+### Text Styling
+- `bold`: Boolean for bold text
+- `italic`: Boolean for italic text
+- `font_color`: Hex color string (e.g., "FF0000" for red)
+- `align`: Text alignment ("left", "center", "right", "justify")
+- `style`: Word paragraph style name (e.g., "Normal", "Heading 1")
+
+### Table Styling
+- `column_widths`: List of width fractions (e.g., [0.3, 0.7])
+- `header_styles`: Dictionary of header styling
+- `column_styles`: Dictionary of column styling by index
+- `row_styles`: Dictionary of row styling by index
+- `cell_styles`: Dictionary of cell styling by (row, col) tuple
+- `bg_color`: Background color as hex string
+
+### Image Styling
+- `max_width`: Maximum width constraint (e.g., "4in", "300px")
+- `max_height`: Maximum height constraint (e.g., "4in", "300px")
+
+## Text and Paragraph Rules
+
+- **Consecutive text blocks** without `\n` are grouped inline by default (in the same paragraph).
+- **Every `\n`** in a text block always starts a new paragraph.
+- **Every `\n\n`** in a text block creates a new paragraph with a blank paragraph in between.
+- **Every `\n\n\n`** creates a new paragraph with two blank paragraphs in between.
+- After a new paragraph (from `\n`), the next inline block starts a new paragraph group.
+- Table cells and headers behave the same way as text blocks: every `\n` creates a new paragraph, and consecutive cell blocks without `\n` are grouped inline.
+- `spacing` parameter adds extra blank paragraphs after that block.
+
+## Style Inheritance and Overrides
 
 - All colors must be passed as hex strings (e.g. "FF0000").
 - If `style` is set, it overrides the default Word paragraph style.
@@ -99,12 +133,3 @@ All blocks that render text support a common style dictionary. This allows for c
 This guide will evolve as more style capabilities are added (e.g., underline, font size, line spacing).
 
 For additional questions or suggestions, please open a GitHub issue or discussion.
-
-## Paragraph and Inline Text Rules
-
-- Consecutive text blocks are grouped inline by default (in the same paragraph group).
-- Any `\n` in a text block always starts a new paragraph (splits the text into multiple paragraphs).
-- `new_paragraph: True` always starts a new paragraph and resets inline grouping.
-- After a new paragraph (from either `\n` or `new_paragraph: True`), the next inline block starts a new paragraph group.
-- Table cells and headers behave the same way as text blocks: every `\n` creates a new paragraph, and consecutive cell blocks are grouped inline unless `\n` or `new_paragraph: True` is used.
-- `spacing` parameter only applies to blocks with `new_paragraph: True` (adds extra blank paragraphs after that block). For inline text, spacing is ignored.
