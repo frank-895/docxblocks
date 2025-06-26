@@ -60,16 +60,32 @@ class RichTextBuilder:
         """
         validated_blocks = []
         for b in blocks:
-            # Try to validate as each block type
-            for block_class in [TextBlock, HeadingBlock, BulletBlock, TableBlock, ImageBlock, PageBreakBlock]:
-                try:
-                    validated_block = block_class.model_validate(b)
-                    validated_blocks.append(validated_block)
-                    break
-                except:
-                    continue
-            else:
-                # If no block type matches, skip this block
+            # Get the block type from the dictionary
+            block_type = b.get('type')
+            if not block_type:
+                continue
+                
+            # Map block types to their corresponding classes
+            block_class_map = {
+                'text': TextBlock,
+                'heading': HeadingBlock,
+                'bullets': BulletBlock,
+                'table': TableBlock,
+                'image': ImageBlock,
+                'page_break': PageBreakBlock
+            }
+            
+            # Get the appropriate block class
+            block_class = block_class_map.get(block_type)
+            if not block_class:
+                continue
+                
+            # Validate the block
+            try:
+                validated_block = block_class.model_validate(b)
+                validated_blocks.append(validated_block)
+            except:
+                # If validation fails, skip this block
                 continue
                 
         for block in validated_blocks:

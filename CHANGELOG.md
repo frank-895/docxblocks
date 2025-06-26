@@ -212,6 +212,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.1] - 2025-06-26
+
+### Fixed
+- **Block Order Preservation**: Blocks are now rendered in the exact order provided to `DocxBuilder.insert()`. The previous logic could result in blocks appearing out of order due to ambiguous validation; this is now resolved.
+- **Validation Logic**: Block validation now uses the `type` field to select the correct schema, preventing accidental misclassification and ensuring robust, predictable rendering.
+- **Test Suite Cleanup**: Tests are now logically grouped, redundant code and files have been removed, and the suite is easier to maintain and extend.
+
 ## [Unreleased]
 
 ### Planned
