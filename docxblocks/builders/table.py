@@ -10,7 +10,9 @@ from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docxblocks.constants import DEFAULT_EMPTY_VALUE_TEXT, DEFAULT_EMPTY_VALUE_STYLE
+from docxblocks.schema.shared import TextStyle
 from docxblocks.utils.styles import set_paragraph_alignment
+from docxblocks.utils.text_processing import add_text_to_cell
 
 
 class TableBuilder:
@@ -105,21 +107,26 @@ class TableBuilder:
             
             for i, header_text in enumerate(headers):
                 cell = row[i]
-                para = cell.paragraphs[0]
                 # Handle empty header text - convert to string first to avoid .strip() on integers
                 header_str = str(header_text) if header_text is not None else ""
                 header_display = header_str.strip() if header_str else DEFAULT_EMPTY_VALUE_TEXT
-                run = para.add_run(str(header_display))
-                run.font.bold = True
-
-                # Apply placeholder style if header is empty
-                if not header_text or not header_str.strip():
-                    run.font.bold = DEFAULT_EMPTY_VALUE_STYLE.get("bold", True)
-                    if DEFAULT_EMPTY_VALUE_STYLE.get("font_color"):
-                        run.font.color.rgb = RGBColor.from_string(DEFAULT_EMPTY_VALUE_STYLE["font_color"])
-
+                
+                # Use shared text processing utility for newline handling
                 header_styles = style_kwargs.get("header_styles") or {}
-                _apply_cell_style(cell, para, run, header_styles)
+                header_style = TextStyle(
+                    bold=True,
+                    align=header_styles.get("align"),
+                    font_color=header_styles.get("font_color")
+                )
+                
+                add_text_to_cell(
+                    cell, header_display, header_style,
+                    is_empty=(not header_text or not header_str.strip())
+                )
+                
+                # Apply additional header styles
+                if header_styles.get("bg_color"):
+                    _set_cell_bg_color(cell, header_styles["bg_color"])
 
         for row_idx, row_data in enumerate(rows):
             table_row = table.add_row()
@@ -132,30 +139,31 @@ class TableBuilder:
             
             for col_idx, cell_val in enumerate(row_data):
                 cell = cells[col_idx]
-                para = cell.paragraphs[0]
                 # Handle empty cell value - convert to string first to avoid .strip() on integers
                 cell_str = str(cell_val) if cell_val is not None else ""
                 cell_display = cell_str.strip() if cell_str else DEFAULT_EMPTY_VALUE_TEXT
-                run = para.add_run(str(cell_display))
-                run.font.bold = False
-
-                # Apply placeholder style if cell is empty
-                if not cell_val or not cell_str.strip():
-                    run.font.bold = DEFAULT_EMPTY_VALUE_STYLE.get("bold", True)
-                    if DEFAULT_EMPTY_VALUE_STYLE.get("font_color"):
-                        run.font.color.rgb = RGBColor.from_string(DEFAULT_EMPTY_VALUE_STYLE["font_color"])
-
-                # Apply column styles
+                
+                # Use shared text processing utility for newline handling
                 col_styles = (style_kwargs.get("column_styles") or {}).get(col_idx, {})
-                _apply_cell_style(cell, para, run, col_styles)
-
-                # Apply row styles
                 row_styles = (style_kwargs.get("row_styles") or {}).get(row_idx, {})
-                _apply_cell_style(cell, para, run, row_styles)
-
-                # Apply cell-specific styles (highest priority)
                 cell_styles = (style_kwargs.get("cell_styles") or {}).get((row_idx, col_idx), {})
-                _apply_cell_style(cell, para, run, cell_styles)
+                
+                # Combine styles (cell-specific has highest priority)
+                combined_styles = {**col_styles, **row_styles, **cell_styles}
+                cell_style = TextStyle(
+                    bold=combined_styles.get("bold", False),
+                    align=combined_styles.get("align"),
+                    font_color=combined_styles.get("font_color")
+                )
+                
+                add_text_to_cell(
+                    cell, cell_display, cell_style,
+                    is_empty=(not cell_val or not cell_str.strip())
+                )
+                
+                # Apply background color if specified
+                if combined_styles.get("bg_color"):
+                    _set_cell_bg_color(cell, combined_styles["bg_color"])
 
         parent.insert(index, table._element)
 

@@ -66,14 +66,22 @@ class ImageBuilder:
                 width_in = width_px / dpi_x
                 height_in = height_px / dpi_y
 
-                scale = 1.0
+                # Calculate scale factors for width and height constraints
+                scales = []
                 max_width = _parse_measurement(style_kwargs.get("max_width"))
                 max_height = _parse_measurement(style_kwargs.get("max_height"))
 
                 if max_width:
-                    scale = min(scale, max_width / width_in)
+                    scales.append(max_width / width_in)
                 if max_height:
-                    scale = min(scale, max_height / height_in)
+                    scales.append(max_height / height_in)
+                
+                # Use the minimum scale to ensure neither dimension exceeds its maximum
+                # This allows upscaling if the image is smaller than the specified constraints
+                if scales:
+                    scale = min(scales)
+                else:
+                    scale = 1.0
 
                 run.add_picture(image_path, width=Inches(width_in * scale), height=Inches(height_in * scale))
 

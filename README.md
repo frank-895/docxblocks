@@ -10,6 +10,7 @@ Unlike templating libraries like `docxtpl`, `docxblocks` keeps **all logic in Py
 
 - Block types: `text`, `heading`, `table`, `bullets`, `image`, `page_break`
 - **Inline text by default** - consecutive text blocks stay on the same line
+- **Smart newline handling** - `\n\n` creates new paragraphs with blank lines
 - Style control via consistent `style` dictionaries
 - Graceful fallback for missing data
 - Declarative, testable, version-controlled
@@ -81,6 +82,39 @@ Each piece of content is a block:
 }
 ```
 
+### Text Block Newline Behavior
+
+Text blocks have intelligent newline handling:
+
+- **Single `\n`**: Remains as literal newline character (inline)
+- **Double `\n\n`**: Creates a new paragraph with a blank line before it
+- **Mixed usage**: Works seamlessly with both patterns
+
+```python
+{"type": "text", "text": "Line 1\nLine 2\n\nNew paragraph with blank line above."}
+```
+
+### Table Cell Newline Behavior
+
+Table cells also support the same intelligent newline handling:
+
+- **Single `\n`**: Remains as literal newline character within the cell
+- **Double `\n\n`**: Creates new paragraphs with blank lines within the cell
+- **Works in headers and data cells**: Both header and row content support newline processing
+
+```python
+{
+    "type": "table",
+    "content": {
+        "headers": ["Name", "Description\n\nDetails"],
+        "rows": [
+            ["Item 1", "First paragraph.\n\nSecond paragraph with blank line."],
+            ["Item 2", "Line 1\nLine 2\n\nNew paragraph."]
+        ]
+    }
+}
+```
+
 Block types:
 
 | Type         | Required Keys     | Optional Keys     |
@@ -92,6 +126,27 @@ Block types:
 | `bullets`    | `items` (list)    |                   |
 | `page_break` | (none)            |                   |
 
+### Image Resizing
+
+Images support automatic resizing with `max_width` and `max_height` constraints:
+
+```python
+{
+    "type": "image", 
+    "path": "chart.png",
+    "style": {
+        "max_width": "4in",
+        "max_height": "3in"
+    }
+}
+```
+
+**Features:**
+- **Upscaling**: Small images can be scaled up to meet size constraints
+- **Downscaling**: Large images are scaled down to fit within constraints  
+- **Aspect ratio preservation**: Images maintain their original proportions
+- **Flexible constraints**: Use either `max_width`, `max_height`, or both
+- **Multiple units**: Supports inches (`"4in"`) and pixels (`"300px"`)
 
 ## 🧪 Example
 
@@ -163,8 +218,9 @@ python text_block_example.py
 python table_block_example.py
 python image_block_example.py
 python combined_example.py
-python inline_text_example.py  # New inline text example
-python page_break_example.py   # New page break example
+python inline_text_example.py  # Inline text functionality
+python page_break_example.py   # Page break functionality
+python newline_example.py      # Newline handling in text and tables
 ```
 
 ### Continuous Integration
