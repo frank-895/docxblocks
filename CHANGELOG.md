@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.6] - 2024-06-26
+### Changed
+- Newline handling is now strictly:
+  - Every single `\n` creates a new paragraph (no extra blank).
+  - Double `\n\n` creates a blank paragraph.
+  - Inline grouping is preserved unless a `\n` is present (separate text blocks are grouped inline).
+- All tests updated and passing for this logic.
+
+---
+
 ## [1.3.5] - 2024-06-26
 ### Changed
 - Unified and corrected newline handling for both text blocks and table cells:

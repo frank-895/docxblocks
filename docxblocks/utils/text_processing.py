@@ -12,16 +12,10 @@ from docxblocks.constants import DEFAULT_EMPTY_VALUE_STYLE, DEFAULT_EMPTY_VALUE_
 
 def process_text_with_newlines(container, text, style=None, is_empty=False):
     """
-    Process text content and handle newlines by creating new paragraphs in a container (doc or cell).
-    
-    Args:
-        container: The python-docx Document or table cell object
-        text: The text content to process
-        style: TextStyle object for styling (optional)
-        is_empty: Whether the original text was empty (for placeholder styling)
-    
-    Returns:
-        list: List of paragraph elements that were created
+    For each segment in text.split('\n'), create a new paragraph (even if the segment is empty).
+    - Single \n creates a new paragraph (no blank)
+    - Double \n\n creates a blank paragraph
+    - Inline grouping is preserved unless a \n is present
     """
     paragraphs = []
     if not text:
@@ -38,31 +32,17 @@ def process_text_with_newlines(container, text, style=None, is_empty=False):
         return paragraphs
 
     lines = text.split('\n')
-    i = 0
-    while i < len(lines):
-        if lines[i]:
-            # If there are preceding empty lines, add blank paragraphs for each
-            j = i - 1
-            blank_count = 0
-            while j >= 0 and lines[j] == '':
-                blank_count += 1
-                j -= 1
-            for _ in range(blank_count):
-                blank_para = container.add_paragraph(
-                    style=style.style if style and style.style else "Normal"
-                )
-                paragraphs.append(blank_para._element)
-            # Add the non-empty paragraph
-            para = container.add_paragraph(
-                style=style.style if style and style.style else "Normal"
-            )
-            paragraphs.append(para._element)
-            run = para.add_run(lines[i])
+    for line in lines:
+        para = container.add_paragraph(
+            style=style.style if style and style.style else "Normal"
+        )
+        paragraphs.append(para._element)
+        if line:
+            run = para.add_run(line)
             if is_empty:
                 apply_style_to_run(run, TextStyle(**DEFAULT_EMPTY_VALUE_STYLE))
             else:
                 apply_style_to_run(run, style)
-        i += 1
     return paragraphs
 
 
