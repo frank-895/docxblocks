@@ -124,6 +124,8 @@ Block types:
 | `table`      | `content`         | `style`           |
 | `image`      | `path`            | `style`           |
 | `page_break` | -                 | -                 |
+| `header`     | `content`         | `apply_to`        |
+| `footer`     | `content`         | `apply_to`        |
 
 ## 🎨 Styling
 
@@ -181,6 +183,155 @@ All block types support four alignment options:
 }
 ```
 
+## 📄 Headers and Footers
+
+DocxBlocks supports customizable headers and footers that can contain any combination of supported block types.
+
+### Basic Headers and Footers
+```python
+blocks = [
+    # Header for all pages
+    {
+        "type": "header",
+        "apply_to": "all",
+        "content": [
+            {
+                "type": "text",
+                "text": "Company Name\tDocument Title\tPage {{page}}",
+                "style": {"align": "center", "font_color": "666666"}
+            }
+        ]
+    },
+    
+    # Footer for all pages
+    {
+        "type": "footer", 
+        "apply_to": "all",
+        "content": [
+            {
+                "type": "text",
+                "text": "© 2024 Company. All rights reserved.",
+                "style": {"align": "center", "italic": True}
+            }
+        ]
+    },
+    
+    # Your main content...
+    {"type": "heading", "text": "Report Title", "level": 1}
+]
+```
+
+### Page-Specific Headers and Footers
+
+Control which pages display specific headers and footers:
+
+```python
+blocks = [
+    # Special header for first page only
+    {
+        "type": "header",
+        "apply_to": "first", 
+        "content": [
+            {
+                "type": "text",
+                "text": "CONFIDENTIAL REPORT",
+                "style": {"align": "center", "bold": True}
+            }
+        ]
+    },
+    
+    # Different headers for odd/even pages (useful for books)
+    {
+        "type": "header",
+        "apply_to": "odd",
+        "content": [
+            {
+                "type": "text", 
+                "text": "Chapter Title\t\tPage {{page}}",
+                "style": {"align": "left"}
+            }
+        ]
+    },
+    
+    {
+        "type": "header",
+        "apply_to": "even",
+        "content": [
+            {
+                "type": "text",
+                "text": "Page {{page}}\t\tBook Title", 
+                "style": {"align": "right"}
+            }
+        ]
+    }
+]
+```
+
+### Complex Header/Footer Content
+
+Headers and footers can contain any block type:
+
+```python
+{
+    "type": "header",
+    "apply_to": "all",
+    "content": [
+        # Table in header
+        {
+            "type": "table",
+            "content": {
+                "headers": ["Company", "Document", "Date"],
+                "rows": [["ACME Corp", "Annual Report", "2024"]]
+            },
+            "style": {"column_widths": [0.3, 0.4, 0.3]}
+        },
+        # Image in header  
+        {
+            "type": "image",
+            "path": "logo.png",
+            "style": {"max_height": "0.5in"}
+        }
+    ]
+}
+```
+
+### Apply To Options
+
+| Option  | Description                              |
+|---------|------------------------------------------|
+| `"all"` | Apply to all pages (default)            |
+| `"all_except_first"` | Apply to all pages except the first (great for cover pages) |
+| `"first"` | Apply only to the first page           |
+| `"odd"`  | Apply to odd-numbered pages             |
+| `"even"` | Apply to even-numbered pages            |
+
+**Note**: Using `"odd"` or `"even"` automatically enables different odd/even headers throughout the document.
+
+### Cover Page Example
+
+Perfect for reports with clean cover pages:
+
+```python
+blocks = [
+    {
+        "type": "header",
+        "apply_to": "all_except_first",
+        "content": [
+            {
+                "type": "text",
+                "text": "Company Report\tConfidential\tPage {{page}}",
+                "style": {"align": "center"}
+            }
+        ]
+    },
+    # Page 1: Clean cover page (no header/footer)
+    {"type": "heading", "text": "ANNUAL REPORT 2024", "level": 1, "style": {"align": "center"}},
+    {"type": "page_break"},
+    # Page 2+: Content with headers/footers
+    {"type": "heading", "text": "Executive Summary", "level": 1}
+]
+```
+
 ## 🔧 Advanced Features
 
 ### Mixed Content
@@ -213,6 +364,8 @@ See the `examples/` directory for complete working examples:
 
 - `text_block_example.py` - Basic text blocks and styling
 - `table_block_example.py` - Table creation and styling
+- `header_footer_example.py` - Headers and footers with various configurations
+- `all_except_first_example.py` - Cover page example with clean first page and headers on content pages
 - `newline_example.py` - Newline handling and paragraph behavior
 - `inline_text_example.py` - Inline text grouping
 - `alignment_example.py` - Text alignment with left, center, right, and justify

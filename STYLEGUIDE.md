@@ -87,6 +87,43 @@ This guide provides comprehensive documentation for styling and formatting optio
 }
 ```
 
+### Headers
+```python
+{
+    "type": "header",
+    "apply_to": "all",  # "all", "all_except_first", "first", "odd", "even"
+    "content": [
+        {
+            "type": "text",
+            "text": "Company Name\tDocument Title\tPage {{page}}",
+            "style": {"align": "center", "font_color": "666666"}
+        },
+        {
+            "type": "table",
+            "content": {
+                "headers": ["Company", "Document"],
+                "rows": [["ACME Corp", "Annual Report"]]
+            }
+        }
+    ]
+}
+```
+
+### Footers
+```python
+{
+    "type": "footer",
+    "apply_to": "all_except_first",  # Perfect for cover pages
+    "content": [
+        {
+            "type": "text",
+            "text": "© 2024 Company. All rights reserved.",
+            "style": {"align": "center", "italic": True}
+        }
+    ]
+}
+```
+
 ## Styling Options
 
 ### Text Styling
@@ -125,6 +162,15 @@ Alignment works consistently across:
 ### Image Styling
 - `max_width`: Maximum width constraint (e.g., "4in", "300px")
 - `max_height`: Maximum height constraint (e.g., "4in", "300px")
+
+### Header and Footer Options
+- `apply_to`: Controls which pages display the header/footer
+  - `"all"`: Apply to all pages (default)
+  - `"all_except_first"`: Apply to all pages except the first (perfect for cover pages)
+  - `"first"`: Apply only to the first page
+  - `"odd"`: Apply to odd-numbered pages (enables odd/even headers)
+  - `"even"`: Apply to even-numbered pages (enables odd/even headers)
+- `content`: List of block dictionaries that can include any supported block type
 
 ## Text and Paragraph Rules
 

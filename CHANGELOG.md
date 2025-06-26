@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.0] - 2025-06-26
+### Added
+- **Customizable Headers and Footers**: Complete header and footer system supporting all block types
+  - New `header` and `footer` block types with configurable page application
+  - Support for page-specific headers/footers: `"all"`, `"first"`, `"odd"`, `"even"`, `"all_except_first"`
+  - **Cover Page Support**: New `"all_except_first"` option perfect for clean cover pages with headers/footers on content pages
+  - Headers and footers can contain any combination of supported block types (text, tables, images, etc.)
+  - Automatic handling of odd/even page settings and first page differentiation
+  - Full integration with existing block validation and rendering system
+
+### Enhanced
+- **RichTextBuilder**: Extended to handle header and footer block validation and rendering
+- **HeaderFooterBuilder**: New specialized builder for configuring document headers and footers
+- **Schema System**: Added `HeaderBlock` and `FooterBlock` to the block type union with proper validation
+- **Template Integration**: Headers and footers work seamlessly with existing template-based workflow
+
+### Technical Improvements
+- **Page Layout Control**: Automatic configuration of Word document section settings for different header/footer types
+- **Content Reuse**: Headers and footers use the same rich content system as main document body
+- **Error Handling**: Graceful handling of invalid header/footer configurations
+- **Comprehensive Testing**: Added 10 comprehensive tests covering all header/footer scenarios including cover page functionality
+- **Example Documentation**: Three complete examples demonstrating basic, advanced, and cover page header/footer usage
+
+### Documentation
+- **Updated README**: Added comprehensive headers and footers section with examples and cover page documentation
+- **Block Type Table**: Updated to include new `header` and `footer` block types
+- **Usage Examples**: Detailed examples showing page-specific headers, complex content, cover page layouts, and styling options
+
+---
+
 ## [1.4.0] - 2025-06-26
 ### Added
 - **Complete Justify Alignment Support**: Added full support for text justification across all block types

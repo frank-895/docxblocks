@@ -44,4 +44,16 @@ class PageBreakBlock(BaseBlock):
     # No additional fields needed for a simple page break
 
 
-Block = Union[TextBlock, HeadingBlock, BulletBlock, TableBlock, ImageBlock, PageBreakBlock]
+class HeaderBlock(BaseBlock):
+    type: Literal["header"]
+    content: List[dict] = Field(..., description="List of block dictionaries for header content")
+    apply_to: Optional[Literal["all", "first", "odd", "even", "all_except_first"]] = Field(default="all", description="Which pages to apply header to")
+
+
+class FooterBlock(BaseBlock):
+    type: Literal["footer"]
+    content: List[dict] = Field(..., description="List of block dictionaries for footer content") 
+    apply_to: Optional[Literal["all", "first", "odd", "even", "all_except_first"]] = Field(default="all", description="Which pages to apply footer to")
+
+
+Block = Union[TextBlock, HeadingBlock, BulletBlock, TableBlock, ImageBlock, PageBreakBlock, HeaderBlock, FooterBlock]
