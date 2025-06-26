@@ -1,8 +1,8 @@
 """
 Inline Text Example
 
-This example demonstrates the new inline text functionality where text blocks
-are inline by default and only create new paragraphs when explicitly specified.
+This example demonstrates how docxblocks groups consecutive text blocks inline
+and handles paragraph breaks with newlines.
 """
 
 from docx import Document
@@ -14,45 +14,161 @@ def main():
     doc.add_paragraph("{{content}}")
     doc.save("inline_text_template.docx")
     
-    # Define blocks with inline text
+    # Define blocks demonstrating inline text grouping
     blocks = [
-        # Inline text blocks - these will all be on the same line
-        {"type": "text", "text": "Participant Name: "},
-        {"type": "text", "text": "John Doe", "style": {"bold": True}},
-        {"type": "text", "text": " (ID: "},
-        {"type": "text", "text": "12345", "style": {"font_color": "007700"}},
-        {"type": "text", "text": ")"},
+        {
+            "type": "heading",
+            "text": "Inline Text Grouping Examples",
+            "level": 1
+        },
+        {
+            "type": "text",
+            "text": "This document demonstrates how docxblocks groups text blocks:"
+        },
         
-        # Force a new paragraph
-        {"type": "text", "text": "Status: Active", "new_paragraph": True},
+        # Basic inline grouping
+        {
+            "type": "heading",
+            "text": "Basic Inline Grouping",
+            "level": 2
+        },
+        {
+            "type": "text",
+            "text": "This text is split into "
+        },
+        {
+            "type": "text",
+            "text": "multiple blocks that are ",
+            "style": {"bold": True}
+        },
+        {
+            "type": "text",
+            "text": "grouped together inline."
+        },
         
-        # More inline text
-        {"type": "text", "text": "This is a "},
-        {"type": "text", "text": "summary", "style": {"bold": True, "italic": True}},
-        {"type": "text", "text": " of the participant's information."},
+        # Mixed inline and paragraphs
+        {
+            "type": "heading",
+            "text": "Mixed Inline and Paragraphs",
+            "level": 2
+        },
+        {
+            "type": "text",
+            "text": "First paragraph with "
+        },
+        {
+            "type": "text",
+            "text": "inline grouping",
+            "style": {"italic": True}
+        },
+        {
+            "type": "text",
+            "text": "\nSecond paragraph with "
+        },
+        {
+            "type": "text",
+            "text": "more inline text",
+            "style": {"font_color": "FF0000"}
+        },
+        {
+            "type": "text",
+            "text": " and even more."
+        },
         
-        # A heading (always creates a new paragraph)
-        {"type": "heading", "text": "Contact Details", "level": 2},
+        # Complex styling example
+        {
+            "type": "heading",
+            "text": "Complex Styling Example",
+            "level": 2
+        },
+        {
+            "type": "text",
+            "text": "This line contains "
+        },
+        {
+            "type": "text",
+            "text": "bold text",
+            "style": {"bold": True}
+        },
+        {
+            "type": "text",
+            "text": ", "
+        },
+        {
+            "type": "text",
+            "text": "italic text",
+            "style": {"italic": True}
+        },
+        {
+            "type": "text",
+            "text": ", and "
+        },
+        {
+            "type": "text",
+            "text": "colored text",
+            "style": {"font_color": "0000FF"}
+        },
+        {
+            "type": "text",
+            "text": " all in one paragraph."
+        },
         
-        # More inline text after the heading
-        {"type": "text", "text": "Phone: "},
-        {"type": "text", "text": "555-1234", "style": {"font_color": "0000FF"}},
-        {"type": "text", "text": " | Email: "},
-        {"type": "text", "text": "john.doe@example.com", "style": {"font_color": "0000FF"}},
+        # Table with inline text
+        {
+            "type": "heading",
+            "text": "Table with Inline Text",
+            "level": 2
+        },
+        {
+            "type": "table",
+            "content": {
+                "headers": ["Name", "Description"],
+                "rows": [
+                    [
+                        "Item 1",
+                        "This is a description with "
+                    ],
+                    [
+                        "Item 2",
+                        "More text that continues "
+                    ]
+                ]
+            },
+            "style": {
+                "header_styles": {"bold": True, "bg_color": "f2f2f2"},
+                "column_widths": [0.3, 0.7]
+            }
+        },
+        {
+            "type": "text",
+            "text": "bold text",
+            "style": {"bold": True}
+        },
+        {
+            "type": "text",
+            "text": " in the table cell."
+        },
+        
+        # Summary
+        {
+            "type": "text",
+            "text": "Summary:\n\n• Consecutive text blocks without \\n are grouped inline\n• Each block can have its own styling\n• Newlines (\\n) start new paragraphs\n• Perfect for complex formatting within paragraphs"
+        }
     ]
     
     # Build the document
     builder = DocxBuilder("inline_text_template.docx")
     builder.insert("{{content}}", blocks)
     builder.save("inline_text_output.docx")
-    
+
     print("Inline text example completed!")
     print("Check 'inline_text_output.docx' to see the result.")
-    print("\nKey features demonstrated:")
-    print("- Text blocks are inline by default (no new paragraphs)")
-    print("- Use 'new_paragraph: true' to force a new paragraph")
-    print("- Different styling can be applied to inline text segments")
-    print("- Headings and other block types still create new paragraphs")
+    print("\nFeatures demonstrated:")
+    print("- Consecutive text blocks are grouped inline")
+    print("- Each block can have individual styling")
+    print("- Newlines start new paragraphs")
+    print("- Complex formatting within paragraphs")
+    print("- Table cells support inline text grouping")
 
 if __name__ == "__main__":
     main() 

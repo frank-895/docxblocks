@@ -90,17 +90,21 @@ class RichTextBuilder:
                 
         for block in validated_blocks:
             if isinstance(block, TextBlock):
+                # Only consecutive text blocks are grouped inline.
                 self._render_text(block)
-            elif isinstance(block, HeadingBlock):
-                self._render_heading(block)
-            elif isinstance(block, BulletBlock):
-                self._render_bullets(block)
-            elif isinstance(block, TableBlock):
-                self._render_table(block)
-            elif isinstance(block, ImageBlock):
-                self._render_image(block)
-            elif isinstance(block, PageBreakBlock):
-                self._render_page_break(block)
+            else:
+                # Any non-text block resets the inline group.
+                self.text_builder = None
+                if isinstance(block, HeadingBlock):
+                    self._render_heading(block)
+                elif isinstance(block, BulletBlock):
+                    self._render_bullets(block)
+                elif isinstance(block, TableBlock):
+                    self._render_table(block)
+                elif isinstance(block, ImageBlock):
+                    self._render_image(block)
+                elif isinstance(block, PageBreakBlock):
+                    self._render_page_break(block)
 
     def _render_text(self, block: TextBlock):
         """

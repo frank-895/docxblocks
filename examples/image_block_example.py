@@ -49,7 +49,6 @@ def main():
             {
                 "type": "text",
                 "text": "This document demonstrates various image sizing scenarios:",
-                "new_paragraph": True
             },
             
             # Example 1: Upscaling small image
@@ -61,7 +60,6 @@ def main():
             {
                 "type": "text",
                 "text": "Original: 1x1 inch → Scaled to: 3x3 inches",
-                "new_paragraph": True
             },
             {
                 "type": "image",
@@ -78,7 +76,6 @@ def main():
             {
                 "type": "text",
                 "text": "Original: 8x6 inch → Scaled to: 4x3 inches",
-                "new_paragraph": True
             },
             {
                 "type": "image",
@@ -98,7 +95,6 @@ def main():
             {
                 "type": "text",
                 "text": "Original: 4x3 inch → No change needed",
-                "new_paragraph": True
             },
             {
                 "type": "image",
@@ -118,7 +114,6 @@ def main():
             {
                 "type": "text",
                 "text": "This demonstrates graceful handling of missing images:",
-                "new_paragraph": True
             },
             {
                 "type": "image",
@@ -133,8 +128,7 @@ def main():
             {
                 "type": "text",
                 "text": "Summary:\n\n• Small images can be upscaled to meet size constraints\n• Large images are scaled down to fit within constraints\n• Images that fit within constraints are left unchanged\n• Missing images show placeholder text\n• Aspect ratio is always preserved",
-                "new_paragraph": True
-            }
+            },
         ]
         
         # Build the document

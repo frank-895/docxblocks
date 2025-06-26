@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "docxblocks"
-version = "1.3.3"
-description = "High-level block-based abstraction over python-docx for building dynamic Word documents in code."
+version = "1.2.0"
+description = "Block-based Word document builder with simple, predictable newline and inline text handling."
 readme = "README.md"
 authors = [
   { name = "Frank Snelling", email = "frank.snelling03@gmail.com" }

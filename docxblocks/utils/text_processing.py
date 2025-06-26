@@ -7,15 +7,18 @@ consistently across different block types (text, table cells, etc.).
 
 from docxblocks.schema.shared import TextStyle
 from docxblocks.utils.styles import apply_style_to_run
-from docxblocks.constants import DEFAULT_EMPTY_VALUE_STYLE
+from docxblocks.constants import DEFAULT_EMPTY_VALUE_STYLE, DEFAULT_EMPTY_VALUE_TEXT
 
 
 def process_text_with_newlines(doc, text, style=None, is_empty=False):
     """
     Process text content and handle newlines by creating new paragraphs.
     
-    This function splits text by \n and creates separate paragraphs for each part.
-    Every \n creates a new paragraph, including empty ones.
+    This function handles newline patterns:
+    - \n creates a new paragraph (no extra spacing)
+    - \n\n creates a new paragraph with one blank paragraph before it
+    - \n\n\n creates a new paragraph with two blank paragraphs before it
+    - And so on for more consecutive newlines
     
     Args:
         doc: The python-docx Document object
@@ -27,26 +30,66 @@ def process_text_with_newlines(doc, text, style=None, is_empty=False):
         list: List of paragraph elements that were created
     """
     paragraphs = []
-    
-    # Split by \n to handle all newlines as paragraph breaks
-    parts = text.split("\n")
-    
-    for i, part in enumerate(parts):
-        # Create new paragraph for this part (including empty ones)
+    if not text:
         para = doc.add_paragraph(
             style=style.style if style and style.style else "Normal"
         )
+        # Add placeholder text for empty content
+        run = para.add_run(DEFAULT_EMPTY_VALUE_TEXT)
+        if is_empty:
+            apply_style_to_run(run, TextStyle(**DEFAULT_EMPTY_VALUE_STYLE))
+        else:
+            apply_style_to_run(run, style)
         paragraphs.append(para._element)
-        
-        # Add the part as a run to the current paragraph
-        if part:  # Only add non-empty parts
-            run = para.add_run(part)
+        return paragraphs
+
+    # Split the text by newlines to process each part
+    lines = text.split('\n')
+    
+    for i, line in enumerate(lines):
+        if i == 0:
+            # First line - just create a paragraph with the content
+            para = doc.add_paragraph(
+                style=style.style if style and style.style else "Normal"
+            )
+            paragraphs.append(para._element)
             
-            # Apply block style, but override with placeholder style if text is empty
-            if is_empty:
-                apply_style_to_run(run, TextStyle(**DEFAULT_EMPTY_VALUE_STYLE))
-            else:
-                apply_style_to_run(run, style)
+            if line:  # Only add non-empty content
+                run = para.add_run(line)
+                if is_empty:
+                    apply_style_to_run(run, TextStyle(**DEFAULT_EMPTY_VALUE_STYLE))
+                else:
+                    apply_style_to_run(run, style)
+        else:
+            # For subsequent lines, check if the previous line was empty
+            # If the previous line was empty, we need to add blank paragraphs
+            if i > 0 and lines[i-1] == '':
+                # Count consecutive empty lines to determine how many blank paragraphs to add
+                consecutive_empty = 0
+                j = i - 1
+                while j >= 0 and lines[j] == '':
+                    consecutive_empty += 1
+                    j -= 1
+                
+                # Add blank paragraphs (one less than consecutive empty lines)
+                for _ in range(consecutive_empty - 1):
+                    blank_para = doc.add_paragraph(
+                        style=style.style if style and style.style else "Normal"
+                    )
+                    paragraphs.append(blank_para._element)
+            
+            # Create paragraph for current line
+            para = doc.add_paragraph(
+                style=style.style if style and style.style else "Normal"
+            )
+            paragraphs.append(para._element)
+            
+            if line:  # Only add non-empty content
+                run = para.add_run(line)
+                if is_empty:
+                    apply_style_to_run(run, TextStyle(**DEFAULT_EMPTY_VALUE_STYLE))
+                else:
+                    apply_style_to_run(run, style)
     
     return paragraphs
 
@@ -56,8 +99,10 @@ def add_text_to_cell(cell, text, style=None, is_empty=False):
     Add text content to a table cell with proper newline handling.
     
     This function processes text content and adds it to a table cell,
-    handling \n patterns by creating multiple paragraphs within the cell.
-    Behaves exactly like process_text_with_newlines for consistency.
+    handling newline patterns consistently with process_text_with_newlines:
+    - \n creates a new paragraph (no extra spacing)
+    - \n\n creates a new paragraph with one blank paragraph before it
+    - \n\n\n creates a new paragraph with two blank paragraphs before it
     
     Args:
         cell: The table cell element
@@ -70,19 +115,46 @@ def add_text_to_cell(cell, text, style=None, is_empty=False):
         p = paragraph._element
         p.getparent().remove(p)
     
-    # Split by \n to handle all newlines as paragraph breaks
-    parts = text.split("\n")
+    if not text:
+        # Handle empty text
+        cell.add_paragraph()
+        return
     
-    for i, part in enumerate(parts):
-        # Create new paragraph for this part (including empty ones)
-        para = cell.add_paragraph()
-        
-        # Add the part as a run to the current paragraph
-        if part:  # Only add non-empty parts
-            run = para.add_run(part)
+    # Split the text by newlines to process each part
+    lines = text.split('\n')
+    
+    for i, line in enumerate(lines):
+        if i == 0:
+            # First line - just create a paragraph with the content
+            para = cell.add_paragraph()
             
-            # Apply block style, but override with placeholder style if text is empty
-            if is_empty:
-                apply_style_to_run(run, TextStyle(**DEFAULT_EMPTY_VALUE_STYLE))
-            else:
-                apply_style_to_run(run, style)
+            if line:  # Only add non-empty content
+                run = para.add_run(line)
+                if is_empty:
+                    apply_style_to_run(run, TextStyle(**DEFAULT_EMPTY_VALUE_STYLE))
+                else:
+                    apply_style_to_run(run, style)
+        else:
+            # For subsequent lines, check if the previous line was empty
+            # If the previous line was empty, we need to add blank paragraphs
+            if i > 0 and lines[i-1] == '':
+                # Count consecutive empty lines to determine how many blank paragraphs to add
+                consecutive_empty = 0
+                j = i - 1
+                while j >= 0 and lines[j] == '':
+                    consecutive_empty += 1
+                    j -= 1
+                
+                # Add blank paragraphs (one less than consecutive empty lines)
+                for _ in range(consecutive_empty - 1):
+                    cell.add_paragraph()
+            
+            # Create paragraph for current line
+            para = cell.add_paragraph()
+            
+            if line:  # Only add non-empty content
+                run = para.add_run(line)
+                if is_empty:
+                    apply_style_to_run(run, TextStyle(**DEFAULT_EMPTY_VALUE_STYLE))
+                else:
+                    apply_style_to_run(run, style)
