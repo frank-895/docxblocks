@@ -88,24 +88,61 @@ class TextBuilder:
                     self.current_paragraph = None
                 else:
                     # This is actual text content
-                    if self.current_paragraph is None:
-                        self.current_paragraph = self.doc.add_paragraph(
-                            style=block.style.style if block.style and block.style.style else "Normal"
-                        )
+                    current_style_name = block.style.style if block.style and block.style.style else "Normal"
+                    current_align = block.style.align if block.style else None
+                    
+                    # Check if we need a new paragraph due to alignment change
+                    if (self.current_paragraph is None or 
+                        getattr(self.current_paragraph, '_last_align', None) != current_align):
+                        
+                        self.current_paragraph = self.doc.add_paragraph(style=current_style_name)
+                        # Apply paragraph alignment when creating new paragraph
+                        if current_align:
+                            set_paragraph_alignment(self.current_paragraph, current_align)
+                        
+                        # Store alignment and style for comparison with subsequent blocks
+                        self.current_paragraph._last_align = current_align
+                        self.current_paragraph._last_style = current_style_name
+                        
                         self.parent.insert(self.index, self.current_paragraph._element)
                         self.index += 1
                     
                     run = self.current_paragraph.add_run(part)
                     apply_style_to_run(run, block.style)
+            
+            # After processing text with newlines, keep current_paragraph set
+            # so that subsequent inline text can be added to the last paragraph created
         else:
             # Handle inline text
+            # Handle inline text - original behavior but check for alignment changes
             if self.current_paragraph is None:
                 # Start a new paragraph
-                self.current_paragraph = self.doc.add_paragraph(
-                    style=block.style.style if block.style and block.style.style else "Normal"
-                )
+                current_style_name = block.style.style if block.style and block.style.style else "Normal"
+                current_align = block.style.align if block.style else None
+                
+                self.current_paragraph = self.doc.add_paragraph(style=current_style_name)
+                # Apply paragraph alignment when creating new paragraph
+                if current_align:
+                    set_paragraph_alignment(self.current_paragraph, current_align)
+                
                 self.parent.insert(self.index, self.current_paragraph._element)
                 self.index += 1
+            else:
+                # Check if alignment has changed and we need a new paragraph
+                current_align = block.style.align if block.style else None
+                last_align = getattr(self.current_paragraph, '_last_align', None)
+                
+                if last_align != current_align:
+                    # Need new paragraph due to alignment change
+                    current_style_name = block.style.style if block.style and block.style.style else "Normal"
+                    self.current_paragraph = self.doc.add_paragraph(style=current_style_name)
+                    if current_align:
+                        set_paragraph_alignment(self.current_paragraph, current_align)
+                    self.parent.insert(self.index, self.current_paragraph._element)
+                    self.index += 1
+            
+            # Store the alignment for next comparison (even for first time)
+            self.current_paragraph._last_align = block.style.align if block.style else None
             
             # Add text to current paragraph
             run = self.current_paragraph.add_run(text)

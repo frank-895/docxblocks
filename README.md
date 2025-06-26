@@ -136,10 +136,24 @@ Block types:
         "bold": True,
         "italic": False,
         "font_color": "FF0000",  # Red
-        "align": "center",
+        "align": "center",       # "left", "center", "right", "justify"
         "style": "Normal"
     }
 }
+```
+
+### Alignment Options
+All block types support four alignment options:
+```python
+# Text alignment examples
+{"type": "text", "text": "Left aligned", "style": {"align": "left"}}
+{"type": "text", "text": "Centered text", "style": {"align": "center"}}
+{"type": "text", "text": "Right aligned", "style": {"align": "right"}}
+{"type": "text", "text": "Justified text that adjusts spacing for clean edges", "style": {"align": "justify"}}
+
+# Works with all block types
+{"type": "heading", "text": "Centered Heading", "level": 1, "style": {"align": "center"}}
+{"type": "bullets", "items": ["Item 1", "Item 2"], "style": {"align": "right"}}
 ```
 
 ### Table Styling
@@ -201,6 +215,7 @@ See the `examples/` directory for complete working examples:
 - `table_block_example.py` - Table creation and styling
 - `newline_example.py` - Newline handling and paragraph behavior
 - `inline_text_example.py` - Inline text grouping
+- `alignment_example.py` - Text alignment with left, center, right, and justify
 - `combined_example.py` - Mixed block types
 
 ## 🤝 Contributing

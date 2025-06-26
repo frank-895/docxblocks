@@ -20,12 +20,13 @@ def set_paragraph_alignment(paragraph, align):
     This is the canonical alignment setter for all block types (table cells, rows, columns, tables, headings, text, etc).
     Args:
         paragraph: The python-docx Paragraph object to align.
-        align: One of 'left', 'center', or 'right'.
+        align: One of 'left', 'center', 'right', or 'justify'.
     """
     align_map = {
         "left": WD_ALIGN_PARAGRAPH.LEFT,
         "center": WD_ALIGN_PARAGRAPH.CENTER,
         "right": WD_ALIGN_PARAGRAPH.RIGHT,
+        "justify": WD_ALIGN_PARAGRAPH.JUSTIFY,
     }
     if align in align_map:
         paragraph.alignment = align_map[align]

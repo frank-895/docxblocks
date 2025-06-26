@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.0] - 2025-06-26
+### Added
+- **Complete Justify Alignment Support**: Added full support for text justification across all block types
+  - Added `"justify"` as a new alignment option alongside `"left"`, `"center"`, and `"right"`
+  - Works with text blocks, headings, bullet lists, table headers, table columns, table rows, and individual table cells
+  - Supports multi-line content alignment in both text blocks and table cells
+  - Comprehensive alignment example (`examples/alignment_example.py`) demonstrating all scenarios
+
+### Enhanced
+- **Universal Alignment System**: Improved alignment functionality across the entire codebase
+  - Fixed alignment support in table cell text processing to ensure consistent behavior
+  - Enhanced text builder to properly handle alignment changes between text blocks
+  - Improved newline processing to preserve alignment settings across paragraph breaks
+  - All four alignment options now work consistently across every block type
+
+### Technical Improvements
+- **Enhanced Schema**: Updated `TextStyle` schema to include `"justify"` as a valid alignment option
+- **Improved Text Processing**: Enhanced `process_text_with_newlines()` utility to apply alignment to all paragraphs
+- **Smart Alignment Detection**: Text builder now detects alignment changes and creates new paragraphs when needed while preserving inline text grouping
+- **Comprehensive Testing**: Added 9 comprehensive alignment tests covering all block types and scenarios
+- **Backward Compatibility**: All existing functionality preserved; existing code continues to work unchanged
+
+### Documentation
+- **Updated Style Guide**: Enhanced documentation with complete justify alignment examples
+- **Comprehensive Examples**: New alignment example showcasing all alignment options across all block types
+- **Test Coverage**: Full test suite ensuring alignment works correctly in all scenarios including edge cases
+
+---
+
 ## [1.3.7] - 2024-06-26
 ### Fixed
 - **Leading Newlines Issue**: Fixed a bug where leading newlines (`\n\n` at the start of text) created extra blank paragraphs. Now `\n\n` consistently creates exactly 1 blank paragraph regardless of position (start, middle, or end).

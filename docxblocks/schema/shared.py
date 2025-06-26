@@ -5,7 +5,7 @@ class TextStyle(BaseModel):
     bold: Optional[bool] = False
     italic: Optional[bool] = False
     font_color: Optional[str] = None  # Hex string, e.g. "FF0000"
-    align: Optional[Literal["left", "center", "right"]] = None
+    align: Optional[Literal["left", "center", "right", "justify"]] = None
     style: Optional[str] = None       # Word paragraph style name
 
 class TableStyle(BaseModel):
