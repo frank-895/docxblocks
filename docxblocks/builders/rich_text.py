@@ -5,7 +5,7 @@ This module provides the RichTextBuilder class for rendering various block types
 It acts as a coordinator that delegates rendering to specialized builders for each block type.
 """
 
-from docxblocks.schema.blocks import Block, TextBlock, HeadingBlock, BulletBlock, TableBlock, ImageBlock, PageBreakBlock
+from docxblocks.schema.blocks import Block, TextBlock, HeadingBlock, BulletBlock, TableBlock, ImageBlock, PageBreakBlock, HeaderBlock, FooterBlock
 from docxblocks.builders.text import TextBuilder
 from docxblocks.builders.heading import HeadingBuilder
 from docxblocks.builders.bullet import BulletBuilder
@@ -72,7 +72,9 @@ class RichTextBuilder:
                 'bullets': BulletBlock,
                 'table': TableBlock,
                 'image': ImageBlock,
-                'page_break': PageBreakBlock
+                'page_break': PageBreakBlock,
+                'header': HeaderBlock,
+                'footer': FooterBlock
             }
             
             # Get the appropriate block class
@@ -105,6 +107,10 @@ class RichTextBuilder:
                     self._render_image(block)
                 elif isinstance(block, PageBreakBlock):
                     self._render_page_break(block)
+                elif isinstance(block, HeaderBlock):
+                    self._render_header(block)
+                elif isinstance(block, FooterBlock):
+                    self._render_footer(block)
 
     def _render_text(self, block: TextBlock):
         """
@@ -205,3 +211,37 @@ class RichTextBuilder:
         builder.build(block)
         # Update index based on how many paragraphs were added
         self.index = builder.index
+
+    def _render_header(self, block: HeaderBlock):
+        """
+        Render a header block using the HeaderFooterBuilder.
+        
+        Args:
+            block: A validated HeaderBlock object
+        """
+        # Reset text builder when we encounter a non-text block
+        self.text_builder = None
+        
+        # Import here to avoid circular imports
+        from docxblocks.builders.header_footer import HeaderFooterBuilder
+        
+        builder = HeaderFooterBuilder(self.doc)
+        builder.build_header(block)
+        # Headers don't affect the current insertion index
+
+    def _render_footer(self, block: FooterBlock):
+        """
+        Render a footer block using the HeaderFooterBuilder.
+        
+        Args:
+            block: A validated FooterBlock object
+        """
+        # Reset text builder when we encounter a non-text block
+        self.text_builder = None
+        
+        # Import here to avoid circular imports
+        from docxblocks.builders.header_footer import HeaderFooterBuilder
+        
+        builder = HeaderFooterBuilder(self.doc)
+        builder.build_footer(block)
+        # Footers don't affect the current insertion index
