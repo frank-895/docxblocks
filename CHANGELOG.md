@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2025-01-27
+
+### Added
+- **Smart Newline Handling**: Text blocks now intelligently handle newline characters
+  - Single `\n` characters remain as literal newlines (inline text)
+  - Double `\n\n` creates a new paragraph with a blank line before it
+  - Mixed usage of single and double newlines works seamlessly
+  - Perfect for creating structured text with proper paragraph spacing
+- **Table Cell Newline Support**: Table cells now support the same intelligent newline handling
+  - `\n\n` in table headers creates new paragraphs with blank lines
+  - `\n\n` in table data cells creates new paragraphs with blank lines
+  - Single `\n` characters remain as literal newlines within cells
+  - Works with all existing table styling options
+- **Image Upscaling**: Images can now be scaled up to meet size constraints
+  - Small images can be upscaled to meet `max_width` and/or `max_height` constraints
+  - Large images are still scaled down as before
+  - Aspect ratio is always preserved
+  - Works with both single and dual dimension constraints
+- **Shared Text Processing**: New utility module for consistent newline handling across block types
+- **Comprehensive Testing**: Added test suite for newline functionality including edge cases
+- **Example Documentation**: New example scripts demonstrating double newline features in text and tables
+
+### Technical Improvements
+- **Enhanced TextBuilder**: Added logic to detect and handle `\n\n` patterns
+- **Enhanced TableBuilder**: Integrated shared text processing for consistent newline handling
+- **Enhanced ImageBuilder**: Modified scaling logic to support upscaling of small images
+- **Backward Compatibility**: All existing functionality remains unchanged
+- **Documentation Updates**: Updated README with newline behavior documentation for both text and table blocks
+
+---
+
 ## [1.2.2] - 2025-01-27
 
 ### Fixed

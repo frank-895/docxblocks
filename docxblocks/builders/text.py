@@ -8,6 +8,7 @@ It handles plain text content with optional styling and supports multi-line text
 from docxblocks.schema.blocks import TextBlock
 from docxblocks.schema.shared import TextStyle
 from docxblocks.utils.styles import apply_style_to_run, set_paragraph_alignment
+from docxblocks.utils.text_processing import process_text_with_newlines
 from docxblocks.constants import DEFAULT_EMPTY_VALUE_TEXT, DEFAULT_EMPTY_VALUE_STYLE
 
 
@@ -46,6 +47,8 @@ class TextBuilder:
         
         This method processes the text block, handles empty values with placeholders,
         and either adds text to the current paragraph (inline) or creates a new paragraph.
+        It also handles \n\n (two consecutive newlines) by creating a new paragraph with
+        a blank line before it.
         
         Args:
             block: A validated TextBlock object containing text content and styling
@@ -62,14 +65,33 @@ class TextBuilder:
                 self.parent.insert(self.index, self.current_paragraph._element)
                 self.index += 1
             
-            # Add text as a run to the current paragraph
-            run = self.current_paragraph.add_run(text)
-            
-            # Apply block style, but override with placeholder style if text is empty
-            if not block.text or not block.text.strip():
-                apply_style_to_run(run, TextStyle(**DEFAULT_EMPTY_VALUE_STYLE))
+            # Use shared text processing utility for \n\n handling
+            if "\n\n" in text:
+                # Process text with newlines and get all paragraphs
+                paragraphs = process_text_with_newlines(
+                    self.doc, text, block.style, 
+                    is_empty=(not block.text or not block.text.strip())
+                )
+                
+                # Replace the current paragraph with the first one from processing
+                if paragraphs:
+                    # Remove the current paragraph and insert the processed ones
+                    self.parent.remove(self.current_paragraph._element)
+                    for i, para_element in enumerate(paragraphs):
+                        self.parent.insert(self.index + i, para_element)
+                    
+                    # Update current paragraph to the last one created
+                    self.current_paragraph = self.doc.paragraphs[-1]
+                    self.index += len(paragraphs)
             else:
-                apply_style_to_run(run, block.style)
+                # No \n\n found, add text as a run to the current paragraph
+                run = self.current_paragraph.add_run(text)
+                
+                # Apply block style, but override with placeholder style if text is empty
+                if not block.text or not block.text.strip():
+                    apply_style_to_run(run, TextStyle(**DEFAULT_EMPTY_VALUE_STYLE))
+                else:
+                    apply_style_to_run(run, block.style)
         else:
             # If text contains newlines, create a paragraph for each line
             lines = text.split("\n")

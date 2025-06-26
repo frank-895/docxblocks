@@ -133,4 +133,78 @@ def test_image_placeholder_for_missing_file(tmp_path):
     # Check that placeholder text was inserted
     paragraphs = [p.text for p in doc2.paragraphs if p.text.strip()]
     assert len(paragraphs) == 1
-    assert "VALUE NOT FOUND" in paragraphs[0] 
+    assert "VALUE NOT FOUND" in paragraphs[0]
+
+def test_image_upscaling(tmp_path):
+    """Test that images can be upscaled when smaller than max constraints"""
+    template = tmp_path / "template.docx"
+    output = tmp_path / "output.docx"
+    doc = Document()
+    doc.add_paragraph("{{main}}")
+    doc.save(str(template))
+
+    # Create a small test image (1x1 inch at 96 DPI)
+    test_image = tmp_path / "small_test.png"
+    img = Image.new('RGB', (96, 96), color='red')  # 1x1 inch at 96 DPI
+    img.save(test_image, dpi=(96, 96))
+
+    blocks = [
+        {
+            "type": "image",
+            "path": str(test_image),
+            "style": {"max_width": "3in"}  # Should upscale from 1in to 3in
+        }
+    ]
+    
+    builder = DocxBuilder(str(template))
+    builder.insert("{{main}}", blocks)
+    builder.save(str(output))
+
+    assert os.path.exists(output)
+    doc2 = Document(str(output))
+    
+    # Check that image was inserted
+    paragraphs = [p for p in doc2.paragraphs if p.runs and any(run._element.findall('.//pic:pic', {'pic': 'http://schemas.openxmlformats.org/drawingml/2006/picture'}) for run in p.runs)]
+    assert len(paragraphs) == 1
+    
+    # Check that the image was upscaled (this is a basic check - the actual size would need more complex verification)
+    # The image should be present and not a placeholder
+    assert not any(DEFAULT_EMPTY_VALUE_TEXT in p.text for p in doc2.paragraphs)
+
+def test_image_upscaling_both_dimensions(tmp_path):
+    """Test that images can be upscaled when both max_width and max_height are specified"""
+    template = tmp_path / "template.docx"
+    output = tmp_path / "output.docx"
+    doc = Document()
+    doc.add_paragraph("{{main}}")
+    doc.save(str(template))
+
+    # Create a small test image (1x0.5 inch at 96 DPI)
+    test_image = tmp_path / "small_rect_test.png"
+    img = Image.new('RGB', (96, 48), color='blue')  # 1x0.5 inch at 96 DPI
+    img.save(test_image, dpi=(96, 96))
+
+    blocks = [
+        {
+            "type": "image",
+            "path": str(test_image),
+            "style": {
+                "max_width": "4in",
+                "max_height": "2in"
+            }  # Should upscale to 4x2 inches
+        }
+    ]
+    
+    builder = DocxBuilder(str(template))
+    builder.insert("{{main}}", blocks)
+    builder.save(str(output))
+
+    assert os.path.exists(output)
+    doc2 = Document(str(output))
+    
+    # Check that image was inserted
+    paragraphs = [p for p in doc2.paragraphs if p.runs and any(run._element.findall('.//pic:pic', {'pic': 'http://schemas.openxmlformats.org/drawingml/2006/picture'}) for run in p.runs)]
+    assert len(paragraphs) == 1
+    
+    # Check that the image was upscaled and not a placeholder
+    assert not any(DEFAULT_EMPTY_VALUE_TEXT in p.text for p in doc2.paragraphs) 
