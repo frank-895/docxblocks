@@ -10,7 +10,9 @@ Unlike templating libraries like `docxtpl`, `docxblocks` keeps **all logic in Py
 
 - Block types: `text`, `heading`, `table`, `bullets`, `image`, `page_break`
 - **Inline text by default** - consecutive text blocks stay on the same line
-- **Smart newline handling** - `\n\n` creates new paragraphs with blank lines
+- **Paragraph splitting** - every `\n` always starts a new paragraph
+- **Explicit paragraph breaks** - `new_paragraph: True` always starts a new paragraph and resets inline grouping
+- **Optional spacing** - `spacing` adds extra blank lines after a block (only with `new_paragraph: True`)
 - Style control via consistent `style` dictionaries
 - Graceful fallback for missing data
 - Declarative, testable, version-controlled
@@ -82,37 +84,43 @@ Each piece of content is a block:
 }
 ```
 
-### Text Block Newline Behavior
+### Text Block Paragraph Behavior
 
-Text blocks have intelligent newline handling:
+Text blocks have clear paragraph handling:
 
-- **Single `\n`**: Remains as literal newline character (inline)
-- **Double `\n\n`**: Creates a new paragraph with a blank line before it
-- **Mixed usage**: Works seamlessly with both patterns
+- **Every `\n`**: Always starts a new paragraph (splits the text into multiple paragraphs)
+- **`new_paragraph: True`**: Always starts a new paragraph and resets inline grouping
+- **`spacing`**: Adds extra blank paragraphs after the block (only applies with `new_paragraph: True`)
+- **Inline grouping**: Consecutive text blocks are grouped inline by default, unless a paragraph break occurs
 
 ```python
-{"type": "text", "text": "Line 1\nLine 2\n\nNew paragraph with blank line above."}
+{"type": "text", "text": "Line 1\nLine 2\nLine 3"}
+# Renders as three paragraphs: Line 1, Line 2, Line 3
+
+{"type": "text", "text": "First", "new_paragraph": True, "spacing": 1}
+# Renders as a new paragraph, then one blank paragraph after
 ```
 
-### Table Cell Newline Behavior
+### Table Cell Paragraph Behavior
 
-Table cells also support the same intelligent newline handling:
+Table cells and headers follow the same rules:
 
-- **Single `\n`**: Remains as literal newline character within the cell
-- **Double `\n\n`**: Creates new paragraphs with blank lines within the cell
-- **Works in headers and data cells**: Both header and row content support newline processing
+- **Every `\n`**: Always starts a new paragraph within the cell
+- **`new_paragraph: True`**: Always starts a new paragraph in the cell
+- **Inline grouping**: Consecutive cell blocks are grouped inline unless a paragraph break occurs
 
 ```python
 {
     "type": "table",
     "content": {
-        "headers": ["Name", "Description\n\nDetails"],
+        "headers": ["Name", "Description\nDetails"],
         "rows": [
-            ["Item 1", "First paragraph.\n\nSecond paragraph with blank line."],
-            ["Item 2", "Line 1\nLine 2\n\nNew paragraph."]
+            ["Item 1", "First paragraph.\nSecond paragraph."],
+            ["Item 2", "Line 1\nLine 2"]
         ]
     }
 }
+# Each '\n' creates a new paragraph within the cell
 ```
 
 Block types:

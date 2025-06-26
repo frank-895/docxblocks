@@ -102,9 +102,9 @@ For additional questions or suggestions, please open a GitHub issue or discussio
 
 ## Paragraph and Inline Text Rules
 
-- Consecutive text blocks are grouped inline by default (in the same paragraph).
+- Consecutive text blocks are grouped inline by default (in the same paragraph group).
 - Any `\n` in a text block always starts a new paragraph (splits the text into multiple paragraphs).
-- `new_paragraph: True` always starts a new paragraph (and resets inline grouping).
+- `new_paragraph: True` always starts a new paragraph and resets inline grouping.
 - After a new paragraph (from either `\n` or `new_paragraph: True`), the next inline block starts a new paragraph group.
 - Table cells and headers behave the same way as text blocks: every `\n` creates a new paragraph, and consecutive cell blocks are grouped inline unless `\n` or `new_paragraph: True` is used.
 - `spacing` parameter only applies to blocks with `new_paragraph: True` (adds extra blank paragraphs after that block). For inline text, spacing is ignored.
