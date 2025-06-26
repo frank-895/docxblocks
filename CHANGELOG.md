@@ -7,7 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.3.4] - 2024-06-18
+## [1.3.5] - 2024-06-26
+### Changed
+- Unified and corrected newline handling for both text blocks and table cells:
+  - Every single `\n` starts a new paragraph (no extra blank).
+  - Double or more newlines create the correct number of blank paragraphs.
+  - Inline text grouping and styling are preserved.
+- All tests updated to expect and verify this behavior.
+
+---
+
+## [1.3.4] - 2024-06-26
 
 ### Changed
 - Major simplification of text block and newline handling:
