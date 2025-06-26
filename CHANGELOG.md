@@ -228,3 +228,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - More styling options (underline, strikethrough, etc.)
 - Template inheritance and composition
 - Performance optimizations for large documents 
+
+## [v1.3.2] - YYYY-MM-DD
+
+### Added
+- Generic newline handling: every `\n` creates a new paragraph everywhere (text blocks, inline text, table cells, table headers).
+- `spacing` parameter is supported for text blocks, adding extra blank paragraphs after the block.
+
+### Changed
+- All text is now consistent inside and outside tables. No more grouping of inline text blocks; each block is its own paragraph.
+- Table cells and headers treat every `\n` as a new paragraph, including empty ones for `\n\n`.
+
+### Fixed
+- All tests updated to match the new behavior.

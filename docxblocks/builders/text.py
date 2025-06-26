@@ -46,9 +46,8 @@ class TextBuilder:
         Build and render a text block in the document.
         
         This method processes the text block, handles empty values with placeholders,
-        and either adds text to the current paragraph (inline) or creates a new paragraph.
-        It also handles \n\n (two consecutive newlines) by creating a new paragraph with
-        a blank line before it.
+        and creates new paragraphs for all newlines. It also handles the spacing
+        parameter to add extra blank lines after the text.
         
         Args:
             block: A validated TextBlock object containing text content and styling
@@ -56,76 +55,23 @@ class TextBuilder:
         # Handle empty text with placeholder
         text = block.text if block.text else DEFAULT_EMPTY_VALUE_TEXT
         
-        if not block.new_paragraph:
-            # Add to current paragraph or create new one if none exists
-            created_new_paragraph = False
-            if self.current_paragraph is None:
-                self.current_paragraph = self.doc.add_paragraph(
+        # Always process text with newlines since all newlines create new paragraphs
+        paragraphs = process_text_with_newlines(
+            self.doc, text, block.style, 
+            is_empty=(not block.text or not block.text.strip())
+        )
+        
+        # Insert the processed paragraphs
+        for i, para_element in enumerate(paragraphs):
+            self.parent.insert(self.index + i, para_element)
+        self.index += len(paragraphs)
+        self.current_paragraph = None  # Always reset after block
+
+        # Handle spacing - add extra blank lines after the text
+        if block.spacing and block.spacing > 1:
+            for _ in range(block.spacing - 1):
+                blank_para = self.doc.add_paragraph(
                     style=block.style.style if block.style and block.style.style else "Normal"
                 )
-                self.parent.insert(self.index, self.current_paragraph._element)
-                created_new_paragraph = True
-            
-            # Use shared text processing utility for \n\n handling
-            if "\n\n" in text:
-                # Process text with newlines and get all paragraphs
-                paragraphs = process_text_with_newlines(
-                    self.doc, text, block.style, 
-                    is_empty=(not block.text or not block.text.strip())
-                )
-                
-                # Replace the current paragraph and insert the processed ones
-                if paragraphs:
-                    self.parent.remove(self.current_paragraph._element)
-                    for i, para_element in enumerate(paragraphs):
-                        self.parent.insert(self.index + i, para_element)
-                    # Update current_paragraph to the last one created
-                    self.current_paragraph = self.doc.paragraphs[-1]
-                    if created_new_paragraph:
-                        self.index += len(paragraphs)
-                    else:
-                        self.index += len(paragraphs) - 1
-            else:
-                # No \n\n found, add text as a run to the current paragraph
-                run = self.current_paragraph.add_run(text)
-                # Apply block style, but override with placeholder style if text is empty
-                if not block.text or not block.text.strip():
-                    apply_style_to_run(run, TextStyle(**DEFAULT_EMPTY_VALUE_STYLE))
-                else:
-                    apply_style_to_run(run, block.style)
-                if created_new_paragraph:
-                    self.index += 1
-        else:
-            # Create a new paragraph for this block
-            self.current_paragraph = None  # Ensure next inline block starts a new group
-            para = self.doc.add_paragraph(
-                style=block.style.style if block.style and block.style.style else "Normal"
-            )
-            
-            # Use shared text processing utility for \n\n handling
-            if "\n\n" in text:
-                # Process text with newlines and get all paragraphs
-                paragraphs = process_text_with_newlines(
-                    self.doc, text, block.style, 
-                    is_empty=(not block.text or not block.text.strip())
-                )
-                
-                # Remove the paragraph we just created and insert the processed ones
-                self.parent.remove(para._element)
-                for i, para_element in enumerate(paragraphs):
-                    self.parent.insert(self.index + i, para_element)
-                self.index += len(paragraphs)
-            else:
-                # No \n\n found, add text as a run to the new paragraph
-                run = para.add_run(text)
-                
-                # Apply block style, but override with placeholder style if text is empty
-                if not block.text or not block.text.strip():
-                    apply_style_to_run(run, TextStyle(**DEFAULT_EMPTY_VALUE_STYLE))
-                else:
-                    apply_style_to_run(run, block.style)
-                
-                set_paragraph_alignment(para, block.style.align if block.style else None)
-                self.parent.insert(self.index, para._element)
-                self.index += 1
-                # Do NOT set self.current_paragraph here 
+                self.parent.insert(self.index, blank_para._element)
+                self.index += 1 

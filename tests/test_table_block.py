@@ -44,7 +44,7 @@ def test_table_block(tmp_path):
     assert len(table.columns) == 3
 
 def test_table_block_with_integers(tmp_path):
-    """Test table block with integer values"""
+    """Test table block with integer values, each value is its own paragraph"""
     template = tmp_path / "template.docx"
     output = tmp_path / "output.docx"
     doc = Document()
@@ -71,19 +71,19 @@ def test_table_block_with_integers(tmp_path):
 
     assert os.path.exists(output)
     doc2 = Document(str(output))
-    
+
     # Check that table was created with integer values
     tables = doc2.tables
     assert len(tables) == 1
-    
+
     table = tables[0]
-    # Check that integer values are properly converted to strings
-    assert table.cell(1, 0).text == "1"
-    assert table.cell(1, 1).text == "100"
-    assert table.cell(1, 2).text == "25"
+    # Check that integer values are properly converted to strings, each as its own paragraph
+    assert table.cell(1, 0).paragraphs[0].text.strip() == "1"
+    assert table.cell(2, 0).paragraphs[0].text.strip() == "2"
+    assert table.cell(3, 0).paragraphs[0].text.strip() == "3"
 
 def test_table_cell_with_single_newlines(tmp_path):
-    """Test that single \n in table cells remains as literal newlines"""
+    """Test that single \n in table cells creates new paragraphs"""
     template = tmp_path / "template.docx"
     output = tmp_path / "output.docx"
     doc = Document()
@@ -109,22 +109,20 @@ def test_table_cell_with_single_newlines(tmp_path):
 
     assert os.path.exists(output)
     doc2 = Document(str(output))
-    
+
     # Check that table was created
     tables = doc2.tables
     assert len(tables) == 1
-    
+
     table = tables[0]
-    
-    # Check first row - should have single paragraph with literal newlines
+
+    # Check first row - should have 3 paragraphs for the description cell
     first_cell = table.cell(1, 1)  # Row 1, Column 1 (description)
     paragraphs = first_cell.paragraphs
-    
-    # Should have only 1 paragraph with literal newlines
-    assert len(paragraphs) == 1
-    
-    # The paragraph should contain all lines with literal \n
-    assert "Line 1\nLine 2\nLine 3" in paragraphs[0].text
+    assert len(paragraphs) == 3
+    assert paragraphs[0].text == "Line 1"
+    assert paragraphs[1].text == "Line 2"
+    assert paragraphs[2].text == "Line 3"
 
 def test_table_cell_with_double_newlines(tmp_path):
     """Test that \n\n in table cells creates new paragraphs with blank lines"""
@@ -153,44 +151,28 @@ def test_table_cell_with_double_newlines(tmp_path):
 
     assert os.path.exists(output)
     doc2 = Document(str(output))
-    
+
     # Check that table was created
     tables = doc2.tables
     assert len(tables) == 1
-    
+
     table = tables[0]
-    
-    # Check first row - should have multiple paragraphs in the description cell
+
+    # Check first row - should have 3 paragraphs for the description cell (including blank)
     first_cell = table.cell(1, 1)  # Row 1, Column 1 (description)
     paragraphs = first_cell.paragraphs
-    
-    # Should have 3 paragraphs: first paragraph, blank line, second paragraph
     assert len(paragraphs) == 3
-    
-    # First paragraph should contain the first part
-    assert "First paragraph." in paragraphs[0].text
-    
-    # Second paragraph should be blank
-    assert not paragraphs[1].text.strip()
-    
-    # Third paragraph should contain the second part
-    assert "Second paragraph with blank line." in paragraphs[2].text
-    
-    # Check second row - should have mixed single and double newlines
-    second_cell = table.cell(2, 1)  # Row 2, Column 1 (description)
-    paragraphs = second_cell.paragraphs
-    
-    # Should have 3 paragraphs: first two lines together, blank line, new paragraph
-    assert len(paragraphs) == 3
-    
-    # First paragraph should contain the first two lines
-    assert "Single line\nAnother line" in paragraphs[0].text
-    
-    # Second paragraph should be blank
-    assert not paragraphs[1].text.strip()
-    
-    # Third paragraph should contain the new paragraph
-    assert "New paragraph." in paragraphs[2].text
+    assert paragraphs[0].text == "First paragraph."
+    assert paragraphs[1].text == ""
+    assert paragraphs[2].text == "Second paragraph with blank line."
+    # Second row, second cell
+    second_cell = table.cell(2, 1)
+    paragraphs2 = second_cell.paragraphs
+    assert len(paragraphs2) == 4
+    assert paragraphs2[0].text == "Single line"
+    assert paragraphs2[1].text == "Another line"
+    assert paragraphs2[2].text == ""
+    assert paragraphs2[3].text == "New paragraph."
 
 def test_table_header_with_double_newlines(tmp_path):
     """Test that \n\n in table headers creates new paragraphs with blank lines"""
@@ -219,25 +201,17 @@ def test_table_header_with_double_newlines(tmp_path):
 
     assert os.path.exists(output)
     doc2 = Document(str(output))
-    
+
     # Check that table was created
     tables = doc2.tables
     assert len(tables) == 1
-    
+
     table = tables[0]
-    
+
     # Check header cell with double newlines
     header_cell = table.cell(0, 1)  # Header row, Column 1
     paragraphs = header_cell.paragraphs
-    
-    # Should have 3 paragraphs: first part, blank line, second part
     assert len(paragraphs) == 3
-    
-    # First paragraph should contain the first part
-    assert "Description" in paragraphs[0].text
-    
-    # Second paragraph should be blank
-    assert not paragraphs[1].text.strip()
-    
-    # Third paragraph should contain the second part
-    assert "Details" in paragraphs[2].text 
+    assert paragraphs[0].text == "Description"
+    assert paragraphs[1].text == ""
+    assert paragraphs[2].text == "Details" 
