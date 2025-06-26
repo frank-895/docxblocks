@@ -114,40 +114,7 @@ def test_mixed_newlines(tmp_path):
     assert paragraphs[3] == "Fourth"
 
 
-def test_spacing_functionality(tmp_path):
-    """Test that spacing parameter adds extra blank lines after a text block"""
-    template = tmp_path / "template.docx"
-    output = tmp_path / "output.docx"
-    doc = Document()
-    doc.add_paragraph("{{main}}")
-    doc.save(str(template))
 
-    blocks = [
-        {"type": "text", "text": "\nFirst paragraph"},
-        {"type": "text", "text": "\nSecond paragraph", "spacing": 2},
-        {"type": "text", "text": "\nThird paragraph"},
-    ]
-
-    builder = DocxBuilder(str(template))
-    builder.insert("{{main}}", blocks)
-    builder.save(str(output))
-
-    assert os.path.exists(output)
-    doc2 = Document(str(output))
-
-    # Get all paragraphs (including blank ones)
-    all_paragraphs = [p.text for p in doc2.paragraphs]
-    # Find the paragraph with "Second paragraph"
-    second_para_index = None
-    for i, p in enumerate(all_paragraphs):
-        if "Second paragraph" in p:
-            second_para_index = i
-            break
-    
-    assert second_para_index is not None, "Second paragraph not found"
-    # There should be blank paragraphs after the second paragraph due to spacing
-    assert all_paragraphs[second_para_index + 1] == ""  # First blank paragraph
-    assert all_paragraphs[second_para_index + 2] == ""  # Second blank paragraph
 
 
 def test_newlines_create_paragraphs(tmp_path):

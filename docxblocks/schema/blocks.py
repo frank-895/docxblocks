@@ -12,7 +12,6 @@ class TextBlock(BaseBlock):
     type: Literal["text"]
     text: str = Field(..., description="Text content - can be empty string")
     style: Optional[TextStyle] = None
-    spacing: Optional[int] = Field(default=1, ge=1, le=5, description="Number of blank lines to insert after this text block")
 
 
 class HeadingBlock(BaseBlock):

@@ -62,25 +62,41 @@ class TextBuilder:
 
         # Handle text with newlines
         if "\n" in text:
-            # Split by newlines and create a paragraph for each part
-            lines = text.split("\n")
-            for line in lines:
-                para = self.doc.add_paragraph(
-                    style=block.style.style if block.style and block.style.style else "Normal"
-                )
-                self.parent.insert(self.index, para._element)
-                self.index += 1
-                
-                if line:  # Only add non-empty content
-                    run = para.add_run(line)
-                    apply_style_to_run(run, block.style)
+            # Use regex to properly handle consecutive newlines
+            import re
             
-            # After newlines, set current_paragraph to the last paragraph created
-            # so subsequent inline blocks are grouped
-            if lines and any(line.strip() for line in lines):
-                self.current_paragraph = para
-            else:
-                self.current_paragraph = None
+            # Split by newlines but preserve information about multiple consecutive newlines
+            # This regex keeps the newlines in the split results
+            parts = re.split(r'(\n+)', text)
+            
+            for part in parts:
+                if not part:  # Skip empty strings
+                    continue
+                    
+                if part.startswith('\n'):
+                    # This is a sequence of newlines - create blank paragraphs
+                    # Number of blank paragraphs = number of newlines - 1
+                    num_blanks = len(part) - 1
+                    for _ in range(num_blanks):
+                        para = self.doc.add_paragraph(
+                            style=block.style.style if block.style and block.style.style else "Normal"
+                        )
+                        self.parent.insert(self.index, para._element)
+                        self.index += 1
+                    
+                    # The last newline creates a new paragraph for the next content
+                    self.current_paragraph = None
+                else:
+                    # This is actual text content
+                    if self.current_paragraph is None:
+                        self.current_paragraph = self.doc.add_paragraph(
+                            style=block.style.style if block.style and block.style.style else "Normal"
+                        )
+                        self.parent.insert(self.index, self.current_paragraph._element)
+                        self.index += 1
+                    
+                    run = self.current_paragraph.add_run(part)
+                    apply_style_to_run(run, block.style)
         else:
             # Handle inline text
             if self.current_paragraph is None:
@@ -95,13 +111,4 @@ class TextBuilder:
             run = self.current_paragraph.add_run(text)
             apply_style_to_run(run, block.style)
 
-        # Handle spacing parameter
-        if block.spacing and block.spacing > 1:
-            for _ in range(block.spacing - 1):
-                blank_para = self.doc.add_paragraph(
-                    style=block.style.style if block.style and block.style.style else "Normal"
-                )
-                self.parent.insert(self.index, blank_para._element)
-                self.index += 1
-            # Spacing ends the current paragraph
-            self.current_paragraph = None 
+ 
