@@ -96,6 +96,24 @@ This guide provides comprehensive documentation for styling and formatting optio
 - `align`: Text alignment ("left", "center", "right", "justify")
 - `style`: Word paragraph style name (e.g., "Normal", "Heading 1")
 
+### Alignment Options
+All block types support four alignment options:
+- `"left"`: Align text to the left margin (default)
+- `"center"`: Center text between margins
+- `"right"`: Align text to the right margin  
+- `"justify"`: Align text to both left and right margins by adjusting word spacing
+
+Alignment works consistently across:
+- Text blocks (including multi-line text with `\n`)
+- Headings (all levels 1-6)
+- Bullet lists
+- Table headers
+- Table columns (applied to all cells in the column)
+- Table rows (applied to all cells in the row)
+- Individual table cells (highest priority)
+
+**Alignment Priority in Tables**: Cell styles override row styles, which override column styles, which override header styles.
+
 ### Table Styling
 - `column_widths`: List of width fractions (e.g., [0.3, 0.7])
 - `header_styles`: Dictionary of header styling

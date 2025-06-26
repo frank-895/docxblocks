@@ -6,7 +6,7 @@ consistently across different block types (text, table cells, etc.).
 """
 
 from docxblocks.schema.shared import TextStyle
-from docxblocks.utils.styles import apply_style_to_run
+from docxblocks.utils.styles import apply_style_to_run, set_paragraph_alignment
 from docxblocks.constants import DEFAULT_EMPTY_VALUE_STYLE, DEFAULT_EMPTY_VALUE_TEXT
 
 
@@ -28,6 +28,10 @@ def process_text_with_newlines(container, text, style=None, is_empty=False):
             apply_style_to_run(run, TextStyle(**DEFAULT_EMPTY_VALUE_STYLE))
         else:
             apply_style_to_run(run, style)
+        
+        # Apply paragraph alignment
+        if style and style.align:
+            set_paragraph_alignment(para, style.align)
         paragraphs.append(para._element)
         return paragraphs
 
@@ -43,6 +47,10 @@ def process_text_with_newlines(container, text, style=None, is_empty=False):
                 apply_style_to_run(run, TextStyle(**DEFAULT_EMPTY_VALUE_STYLE))
             else:
                 apply_style_to_run(run, style)
+        
+        # Apply paragraph alignment for all paragraphs (even empty ones)
+        if style and style.align:
+            set_paragraph_alignment(para, style.align)
     return paragraphs
 
 
