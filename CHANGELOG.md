@@ -5,7 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.0] - 2025-01-27
+---
+
+## [1.3.1] - 2025-06-26
+
+### Fixed
+- **Block Order Preservation**: Blocks are now rendered in the exact order provided to `DocxBuilder.insert()`. The previous logic could result in blocks appearing out of order due to ambiguous validation; this is now resolved.
+- **Validation Logic**: Block validation now uses the `type` field to select the correct schema, preventing accidental misclassification and ensuring robust, predictable rendering.
+- **Test Suite Cleanup**: Tests are now logically grouped, redundant code and files have been removed, and the suite is easier to maintain and extend.
+
+## [Unreleased]
+
+### Planned
+- Additional block types (charts, page breaks, etc.)
+- More styling options (underline, strikethrough, etc.)
+- Template inheritance and composition
+- Performance optimizations for large documents 
+
+--- 
+
+## [1.3.0] - 2025-06-26
 
 ### Added
 - **Smart Newline Handling**: Text blocks now intelligently handle newline characters
@@ -36,7 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.2.2] - 2025-01-27
+## [1.2.2] - 2025-06-25
 
 ### Fixed
 - **Inline Text After New Paragraph**: Fixed a bug where a text block following a block with `"new_paragraph": True` would incorrectly start a new paragraph. Now, inline text after a new paragraph block is correctly added to the same paragraph, as expected.
@@ -53,7 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.2.0] - 2025-01-27
+## [1.2.0] - 2025-06-25
 
 ### Added
 - **Page Break Blocks**: New `page_break` block type for creating multi-page documents
@@ -209,20 +228,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - python-docx >= 0.8.11
 - Pillow >= 10.0.0
 - pydantic >= 2.0.0
-
----
-
-## [1.3.1] - 2025-06-26
-
-### Fixed
-- **Block Order Preservation**: Blocks are now rendered in the exact order provided to `DocxBuilder.insert()`. The previous logic could result in blocks appearing out of order due to ambiguous validation; this is now resolved.
-- **Validation Logic**: Block validation now uses the `type` field to select the correct schema, preventing accidental misclassification and ensuring robust, predictable rendering.
-- **Test Suite Cleanup**: Tests are now logically grouped, redundant code and files have been removed, and the suite is easier to maintain and extend.
-
-## [Unreleased]
-
-### Planned
-- Additional block types (charts, page breaks, etc.)
-- More styling options (underline, strikethrough, etc.)
-- Template inheritance and composition
-- Performance optimizations for large documents 
