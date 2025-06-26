@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.7] - 2024-06-26
+### Fixed
+- **Leading Newlines Issue**: Fixed a bug where leading newlines (`\n\n` at the start of text) created extra blank paragraphs. Now `\n\n` consistently creates exactly 1 blank paragraph regardless of position (start, middle, or end).
+- **Regex-Based Newline Processing**: Replaced naive `split('\n')` logic with proper regex parsing to handle consecutive newlines correctly.
+
+### Removed
+- **Deprecated Parameters**: Removed deprecated `spacing` parameter from `TextBlock` schema and all related logic.
+- **Deprecated Tests**: Removed obsolete spacing functionality tests.
+
+### Changed
+- **Single Source of Truth**: `\n` is now the only way to create new paragraphs - clean, consistent, and intuitive.
+- **Unified Logic**: All newline handling now follows the same pattern: n newlines = (n-1) blank paragraphs between content.
+
+---
+
 ## [1.3.6] - 2024-06-26
 ### Changed
 - Newline handling is now strictly:
