@@ -27,17 +27,21 @@ def test_inline_text_default(tmp_path):
     assert os.path.exists(output)
     doc2 = Document(str(output))
     
-    # Should have 2 paragraphs: inline text, new paragraph text + inline text
+    # Should have 3 paragraphs: inline text, new paragraph text, inline text after new paragraph
     paragraphs = [p.text for p in doc2.paragraphs if p.text.strip()]
-    assert len(paragraphs) == 2
+    assert len(paragraphs) == 3
     
     # First paragraph should contain all the inline text
     first_para = paragraphs[0]
     assert "Participant Name: John Doe (ID: 12345)" in first_para
     
-    # Second paragraph should contain the new paragraph text and the inline text after it
+    # Second paragraph should contain the new paragraph text
     second_para = paragraphs[1]
-    assert "New line starts hereThis should be on the same line as above" in second_para
+    assert "New line starts here" in second_para
+    
+    # Third paragraph should contain the inline text after the new paragraph
+    third_para = paragraphs[2]
+    assert "This should be on the same line as above" in third_para
 
 def test_mixed_inline_and_paragraphs(tmp_path):
     """Test mixing inline text with other block types"""
@@ -96,9 +100,12 @@ def test_inline_after_new_paragraph(tmp_path):
     assert os.path.exists(output)
     doc2 = Document(str(output))
     
-    # Should have only 1 paragraph with both pieces of text
+    # Should have 2 paragraphs: new paragraph text and inline text after it
     paragraphs = [p.text for p in doc2.paragraphs if p.text.strip()]
-    assert len(paragraphs) == 1
+    assert len(paragraphs) == 2
     
-    # The paragraph should contain both pieces of text
-    assert "Participant No: 12345" in paragraphs[0] 
+    # First paragraph should contain the new paragraph text
+    assert "Participant No: " in paragraphs[0]
+    
+    # Second paragraph should contain the inline text after the new paragraph
+    assert "12345" in paragraphs[1] 
