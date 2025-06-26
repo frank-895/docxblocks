@@ -99,3 +99,12 @@ All blocks that render text support a common style dictionary. This allows for c
 This guide will evolve as more style capabilities are added (e.g., underline, font size, line spacing).
 
 For additional questions or suggestions, please open a GitHub issue or discussion.
+
+## Paragraph and Inline Text Rules
+
+- Consecutive text blocks are grouped inline by default (in the same paragraph).
+- Any `\n` in a text block always starts a new paragraph (splits the text into multiple paragraphs).
+- `new_paragraph: True` always starts a new paragraph (and resets inline grouping).
+- After a new paragraph (from either `\n` or `new_paragraph: True`), the next inline block starts a new paragraph group.
+- Table cells and headers behave the same way as text blocks: every `\n` creates a new paragraph, and consecutive cell blocks are grouped inline unless `\n` or `new_paragraph: True` is used.
+- `spacing` parameter only applies to blocks with `new_paragraph: True` (adds extra blank paragraphs after that block). For inline text, spacing is ignored.

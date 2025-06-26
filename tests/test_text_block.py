@@ -120,7 +120,7 @@ def test_mixed_newlines(tmp_path):
     assert all_paragraphs[2] == ""  # Empty paragraph from \n\n
 
 def test_spacing_functionality(tmp_path):
-    """Test that spacing parameter adds extra blank lines after text"""
+    """Test that spacing parameter adds extra blank lines after new_paragraph text"""
     template = tmp_path / "template.docx"
     output = tmp_path / "output.docx"
     doc = Document()
@@ -128,9 +128,9 @@ def test_spacing_functionality(tmp_path):
     doc.save(str(template))
 
     blocks = [
-        {"type": "text", "text": "First paragraph"},
-        {"type": "text", "text": "Second paragraph", "spacing": 2},
-        {"type": "text", "text": "Third paragraph"},
+        {"type": "text", "text": "First paragraph", "new_paragraph": True},
+        {"type": "text", "text": "Second paragraph", "new_paragraph": True, "spacing": 2},
+        {"type": "text", "text": "Third paragraph", "new_paragraph": True},
     ]
 
     builder = DocxBuilder(str(template))

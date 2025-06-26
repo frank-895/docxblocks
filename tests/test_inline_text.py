@@ -3,7 +3,7 @@ from docx import Document
 from docxblocks.core.inserter import DocxBuilder
 
 def test_inline_text_default(tmp_path):
-    """Test that text blocks each create their own paragraph (no grouping)"""
+    """Test that text blocks are inline by default (no new paragraphs)"""
     template = tmp_path / "template.docx"
     output = tmp_path / "output.docx"
     doc = Document()
@@ -27,19 +27,24 @@ def test_inline_text_default(tmp_path):
     assert os.path.exists(output)
     doc2 = Document(str(output))
     
-    # Each block is now its own paragraph
+    # Should have 3 paragraphs: inline text, new paragraph text, inline text after new paragraph
     paragraphs = [p.text for p in doc2.paragraphs if p.text.strip()]
-    assert len(paragraphs) == 7
-    assert "Participant Name: " in paragraphs[0]
-    assert "John Doe" in paragraphs[1]
-    assert " (ID: " in paragraphs[2]
-    assert "12345" in paragraphs[3]
-    assert ")" in paragraphs[4]
-    assert "New line starts here" in paragraphs[5]
-    assert "This should be on the same line as above" in paragraphs[6]
+    assert len(paragraphs) == 3
+    
+    # First paragraph should contain all the inline text
+    first_para = paragraphs[0]
+    assert "Participant Name: John Doe (ID: 12345)" in first_para
+    
+    # Second paragraph should contain the new paragraph text
+    second_para = paragraphs[1]
+    assert "New line starts here" in second_para
+    
+    # Third paragraph should contain the inline text after the new paragraph
+    third_para = paragraphs[2]
+    assert "This should be on the same line as above" in third_para
 
 def test_mixed_inline_and_paragraphs(tmp_path):
-    """Test mixing inline text with other block types, all text blocks are separate paragraphs"""
+    """Test mixing inline text with other block types"""
     template = tmp_path / "template.docx"
     output = tmp_path / "output.docx"
     doc = Document()
@@ -62,18 +67,21 @@ def test_mixed_inline_and_paragraphs(tmp_path):
     assert os.path.exists(output)
     doc2 = Document(str(output))
     
-    # Each text block is now its own paragraph
+    # Should have 3 paragraphs: inline text, heading, inline text
     paragraphs = [p.text for p in doc2.paragraphs if p.text.strip()]
-    assert len(paragraphs) == 6
-    assert "Status: " in paragraphs[0]
-    assert "Active" in paragraphs[1]
-    assert "Summary" in paragraphs[2]
-    assert "This is a " in paragraphs[3]
-    assert "summary" in paragraphs[4]
-    assert " of the report." in paragraphs[5]
+    assert len(paragraphs) == 3
+    
+    # First paragraph should contain inline status text
+    assert "Status: Active" in paragraphs[0]
+    
+    # Second paragraph should be the heading
+    assert "Summary" in paragraphs[1]
+    
+    # Third paragraph should contain inline summary text
+    assert "This is a summary of the report." in paragraphs[2]
 
 def test_inline_after_new_paragraph(tmp_path):
-    """Test that each text block after a new_paragraph is its own paragraph"""
+    """Test that inline text works correctly after a new_paragraph block"""
     template = tmp_path / "template.docx"
     output = tmp_path / "output.docx"
     doc = Document()
@@ -92,7 +100,7 @@ def test_inline_after_new_paragraph(tmp_path):
     assert os.path.exists(output)
     doc2 = Document(str(output))
     
-    # Each block is now its own paragraph
+    # Should have 2 paragraphs: one for each group
     paragraphs = [p.text for p in doc2.paragraphs if p.text.strip()]
     assert len(paragraphs) == 2
     assert "Participant No: " in paragraphs[0]

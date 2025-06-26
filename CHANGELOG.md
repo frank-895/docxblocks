@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.3] - 2025-06-26
+
+### Changed
+- Finalized paragraph and inline grouping rules: consecutive text blocks are grouped inline by default, but any `\n` or `new_paragraph: True` always starts a new paragraph and resets grouping.
+- After a new paragraph, the next inline block starts a new paragraph group.
+- Table cells and headers behave the same way as text blocks.
+- `spacing` parameter only applies to blocks with `new_paragraph: True`.
+
+### Fixed
+- All tests and documentation updated to match the final rules.
+
+---
+
 ## [1.3.2] - 2025-06-26
 
 ### Added
