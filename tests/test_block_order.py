@@ -102,7 +102,7 @@ def test_mixed_block_types_order(tmp_path):
     assert len(tables) == 1, "Expected 1 table to be present"
 
 def test_inline_text_order(tmp_path):
-    """Test that inline text blocks maintain their order"""
+    """Test that inline text blocks maintain their order and grouping"""
     template = tmp_path / "template.docx"
     output = tmp_path / "output.docx"
     doc = Document()
@@ -117,20 +117,21 @@ def test_inline_text_order(tmp_path):
         {"type": "text", "text": "Fourth "},
         {"type": "text", "text": "Fifth", "new_paragraph": True},
     ]
-    
+
     builder = DocxBuilder(str(template))
     builder.insert("{{main}}", blocks)
     builder.save(str(output))
 
     assert os.path.exists(output)
     doc2 = Document(str(output))
-    
+
     # Get all paragraphs with text content
     paragraphs = [p.text.strip() for p in doc2.paragraphs if p.text.strip()]
-    
+
     # The text builder creates separate paragraphs for each new_paragraph=True block
-    # So we should have: "First Second", "Third", "Fourth Fifth"
-    assert len(paragraphs) == 3
+    # So we should have: "First Second", "Third", "Fourth", "Fifth"
+    assert len(paragraphs) == 4
     assert "First Second" in paragraphs[0]
     assert "Third" in paragraphs[1]
-    assert "Fourth Fifth" in paragraphs[2] 
+    assert "Fourth" in paragraphs[2]
+    assert "Fifth" in paragraphs[3] 

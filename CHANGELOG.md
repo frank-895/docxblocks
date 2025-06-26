@@ -14,14 +14,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Validation Logic**: Block validation now uses the `type` field to select the correct schema, preventing accidental misclassification and ensuring robust, predictable rendering.
 - **Test Suite Cleanup**: Tests are now logically grouped, redundant code and files have been removed, and the suite is easier to maintain and extend.
 
-## [Unreleased]
-
-### Planned
-- Additional block types (charts, page breaks, etc.)
-- More styling options (underline, strikethrough, etc.)
-- Template inheritance and composition
-- Performance optimizations for large documents 
-
 --- 
 
 ## [1.3.0] - 2025-06-26
@@ -228,3 +220,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - python-docx >= 0.8.11
 - Pillow >= 10.0.0
 - pydantic >= 2.0.0
+
+## [Unreleased]
+
+### Planned
+- Additional block types (charts, page breaks, etc.)
+- More styling options (underline, strikethrough, etc.)
+- Template inheritance and composition
+- Performance optimizations for large documents 
