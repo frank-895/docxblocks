@@ -35,7 +35,7 @@ def test_page_break_simple(tmp_path):
     assert "After page break" in text_paragraphs[1].text
 
 def test_page_break_with_inline_text(tmp_path):
-    """Test that page breaks work correctly with each text block as its own paragraph"""
+    """Test that page breaks work correctly with inline text"""
     template = tmp_path / "template.docx"
     output = tmp_path / "output.docx"
     doc = Document()
@@ -57,10 +57,14 @@ def test_page_break_with_inline_text(tmp_path):
     assert os.path.exists(output)
     doc2 = Document(str(output))
     
-    # Each text block is now its own paragraph
+    # Should have 2 text paragraphs (inline text combined) plus page break
     all_paragraphs = list(doc2.paragraphs)
-    assert len(all_paragraphs) == 5  # Four text paragraphs + page break
-    assert "First page: " in all_paragraphs[0].text
-    assert "inline text" in all_paragraphs[1].text
-    assert "Second page: " in all_paragraphs[3].text
-    assert "more inline text" in all_paragraphs[4].text 
+    assert len(all_paragraphs) == 3  # Two text paragraphs + page break
+    
+    # Check first paragraph has combined inline text
+    first_para = all_paragraphs[0]
+    assert "First page: inline text" in first_para.text
+    
+    # Check second paragraph has combined inline text
+    second_para = all_paragraphs[2]
+    assert "Second page: more inline text" in second_para.text 
