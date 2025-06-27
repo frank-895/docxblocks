@@ -9,6 +9,7 @@ from docx import Document
 from docxblocks.core.inserter import DocxBuilder
 from docxblocks.schema.blocks import HeaderBlock, FooterBlock
 from docxblocks.builders.header_footer import HeaderFooterBuilder
+from PIL import Image
 
 
 def test_header_block_validation():
@@ -392,6 +393,114 @@ def test_all_except_first_header_footer():
         # Check that default header/footer have content (for pages 2+)
         assert not section.header.is_linked_to_previous
         assert not section.footer.is_linked_to_previous
+
+
+def test_header_with_image():
+    """Test that images can be added to headers and display correctly."""
+    with tempfile.TemporaryDirectory() as temp_dir:
+        template_path = os.path.join(temp_dir, "test_template.docx")
+        output_path = os.path.join(temp_dir, "test_output.docx")
+        
+        # Create a test image
+        test_image = os.path.join(temp_dir, "test_image.png")
+        img = Image.new('RGB', (200, 100), color='blue')
+        img.save(test_image, dpi=(96, 96))
+        
+        doc = Document()
+        doc.add_paragraph("{{content}}")
+        doc.save(template_path)
+        
+        blocks = [
+            {
+                "type": "header",
+                "apply_to": "all",
+                "content": [
+                    {
+                        "type": "image",
+                        "path": test_image,
+                        "style": {"max_width": "1.5in"}
+                    },
+                    {
+                        "type": "text",
+                        "text": "Header with Image",
+                        "style": {"align": "center", "bold": True}
+                    }
+                ]
+            },
+            {
+                "type": "text",
+                "text": "Main document content. The header should contain an image."
+            }
+        ]
+        
+        builder = DocxBuilder(template_path)
+        builder.insert("{{content}}", blocks)
+        builder.save(output_path)
+        
+        # Verify the document was created successfully
+        assert os.path.exists(output_path)
+        result_doc = Document(output_path)
+        section = result_doc.sections[0]
+        
+        # Verify header has content (not linked to previous)
+        assert not section.header.is_linked_to_previous
+        
+        # Check that the header has paragraphs (indicating content was added)
+        assert len(section.header.paragraphs) > 0
+
+
+def test_footer_with_image():
+    """Test that images can be added to footers and display correctly."""
+    with tempfile.TemporaryDirectory() as temp_dir:
+        template_path = os.path.join(temp_dir, "test_template.docx")
+        output_path = os.path.join(temp_dir, "test_output.docx")
+        
+        # Create a test image
+        test_image = os.path.join(temp_dir, "test_image.png")
+        img = Image.new('RGB', (200, 100), color='green')
+        img.save(test_image, dpi=(96, 96))
+        
+        doc = Document()
+        doc.add_paragraph("{{content}}")
+        doc.save(template_path)
+        
+        blocks = [
+            {
+                "type": "footer",
+                "apply_to": "all",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Footer with Image",
+                        "style": {"align": "center", "bold": True}
+                    },
+                    {
+                        "type": "image",
+                        "path": test_image,
+                        "style": {"max_width": "1.5in"}
+                    }
+                ]
+            },
+            {
+                "type": "text",
+                "text": "Main document content. The footer should contain an image."
+            }
+        ]
+        
+        builder = DocxBuilder(template_path)
+        builder.insert("{{content}}", blocks)
+        builder.save(output_path)
+        
+        # Verify the document was created successfully
+        assert os.path.exists(output_path)
+        result_doc = Document(output_path)
+        section = result_doc.sections[0]
+        
+        # Verify footer has content (not linked to previous)
+        assert not section.footer.is_linked_to_previous
+        
+        # Check that the footer has paragraphs (indicating content was added)
+        assert len(section.footer.paragraphs) > 0
 
 
 def test_invalid_apply_to_values():

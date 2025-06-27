@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.1] - 2025-01-27
+### Fixed
+- **Images in Headers and Footers**: Fixed critical issue where images would not display in headers and footers
+  - Images now properly embed and display in both headers and footers using direct header/footer methods
+  - Replaced problematic `parent.insert()` approach with direct `header.add_paragraph()` and `footer.add_paragraph()` methods
+  - Fixed invalid `placeholder=None` parameter in `ImageBuilder.build()` calls that was causing silent failures
+  - Images are now embedded using file objects to ensure proper embedding in headers/footers
+  - Added comprehensive error handling and placeholder text for missing or invalid images
+
+### Enhanced
+- **HeaderFooterBuilder**: Completely refactored to handle images and other content directly using header/footer methods
+  - Added direct support for text, images, headings, and other block types in headers/footers
+  - Implemented proper styling support (alignment, bold, italic, font color) for header/footer content
+  - Added image sizing and scaling support with `max_width` and `max_height` constraints
+  - Enhanced error handling with graceful fallbacks for missing images or invalid content
+
+### Technical Improvements
+- **Image Embedding**: Updated `ImageBuilder` to use file objects for image embedding, ensuring compatibility with headers/footers
+- **Parent Method Detection**: Added fallback logic to use parent's `add_paragraph()` method when available
+- **Comprehensive Testing**: Added dedicated tests for images in headers and footers to prevent regression
+- **Example Documentation**: Updated header/footer example to demonstrate image functionality
+
+### Documentation
+- **Updated Examples**: Added third example in `header_footer_example.py` demonstrating images in headers and footers
+- **Test Coverage**: Added `test_header_with_image()` and `test_footer_with_image()` to ensure functionality remains working
+- **Backward Compatibility**: All existing header/footer functionality preserved; only image display issue resolved
+
+---
+
 ## [1.5.0] - 2025-06-26
 ### Added
 - **Customizable Headers and Footers**: Complete header and footer system supporting all block types
