@@ -171,6 +171,53 @@ All block types support four alignment options:
 }
 ```
 
+### Rich Content in Table Cells
+
+Table cells can now contain rich content including text, images, bullets, and headings. Each cell can be either:
+- **Plain text** (string) - works as before
+- **Rich content** (list of block dictionaries) - new feature
+
+```python
+{
+    "type": "table",
+    "content": {
+        "headers": ["Product", "Description", "Features", "Image"],
+        "rows": [
+            [
+                "Product A",
+                [
+                    {"type": "heading", "text": "Premium Product", "level": 3},
+                    {"type": "text", "text": "High-quality product with excellent features.", "style": {"italic": True}}
+                ],
+                [
+                    {"type": "bullets", "items": ["Feature 1", "Feature 2", "Feature 3"]}
+                ],
+                [
+                    {"type": "image", "path": "logo.png", "style": {"max_width": "1in"}}
+                ]
+            ],
+            [
+                "Product B",
+                "Simple text description",  # Plain text still works
+                [
+                    {"type": "bullets", "items": ["Basic feature", "Standard quality"]}
+                ],
+                "No image"
+            ]
+        ]
+    }
+}
+```
+
+**Supported Rich Content Types in Cells:**
+- **Text blocks** with styling (bold, italic, color, alignment)
+- **Images** with sizing constraints
+- **Bullet lists** with custom styling
+- **Headings** (levels 1-6) for cell structure
+- **Mixed content** - combine multiple block types in one cell
+
+**Backward Compatibility:** All existing plain text cells continue to work exactly as before.
+
 ### Image Styling
 ```python
 {
