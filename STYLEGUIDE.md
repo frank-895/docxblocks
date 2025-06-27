@@ -68,6 +68,38 @@ This guide provides comprehensive documentation for styling and formatting optio
 }
 ```
 
+#### Rich Content in Table Cells
+
+Table cells can contain either plain text (string) or rich content (list of block dictionaries):
+
+```python
+{
+    "type": "table",
+    "content": {
+        "headers": ["Product", "Description", "Features"],
+        "rows": [
+            [
+                "Product A",
+                [
+                    {"type": "heading", "text": "Premium Product", "level": 3},
+                    {"type": "text", "text": "High-quality product.", "style": {"italic": True}},
+                    {"type": "image", "path": "logo.png", "style": {"max_width": "1in"}},
+                    {"type": "bullets", "items": ["Feature 1", "Feature 2"]}
+                ],
+                "Simple text cell"
+            ]
+        ]
+    }
+}
+```
+
+**Supported Rich Content Types in Cells:**
+- Text blocks with styling (bold, italic, color, alignment)
+- Images with sizing constraints
+- Bullet lists with custom styling
+- Headings (levels 1-6) for cell structure
+- Mixed content - combine multiple block types in one cell
+
 ### Images
 ```python
 {
