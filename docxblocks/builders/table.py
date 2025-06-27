@@ -161,11 +161,22 @@ class TableBuilder:
         
         # Check if content is rich (list of block dictionaries)
         if isinstance(content, list) and len(content) > 0 and isinstance(content[0], dict):
-            # Rich content - use RichTextBuilder
-            # Import here to avoid circular import
+            # Rich content - merge styles into each block
             from docxblocks.builders.rich_text import RichTextBuilder
+            merged_blocks = []
+            for block in content:
+                block = dict(block)  # shallow copy
+                # Merge styles: block's style takes precedence over cell styles
+                block_style = dict(styles) if styles else {}
+                if 'style' in block and isinstance(block['style'], dict):
+                    block_style.update(block['style'])
+                block['style'] = block_style
+                merged_blocks.append(block)
             builder = RichTextBuilder(doc, cell._element, 0)
-            builder.render(content)
+            builder.render(merged_blocks)
+            # Apply background color if specified (only bg_color makes sense at cell level for rich content)
+            if styles.get("bg_color"):
+                _set_cell_bg_color(cell, styles["bg_color"])
         else:
             # Plain text content - use existing text processing
             cell_str = str(content) if content is not None else ""
