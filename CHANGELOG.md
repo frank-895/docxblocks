@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.6.0] - 2025-01-27
+## [1.6.1] - 2024-06-27
+### Fixed
+- Robust and predictable styling for rich content in table cells. Cell/row/column/table styles are now merged correctly with block styles, preventing unwanted bold/italic/color bleed.
+
+---
+
+## [1.6.0] - 2025-06-27
 ### Added
 - **Rich Content in Table Cells**: Table cells now support rich content including text, images, bullets, and headings
   - Table cells can contain either plain text (string) or rich content (list of block dictionaries)
@@ -36,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.5.1] - 2025-01-27
+## [1.5.1] - 2025-06-27
 ### Fixed
 - **Images in Headers and Footers**: Fixed critical issue where images would not display in headers and footers
   - Images now properly embed and display in both headers and footers using direct header/footer methods
