@@ -26,6 +26,9 @@ class TableBuilder:
     
     The builder creates tables with the "Table Grid" style by default and
     supports various styling options through the style_kwargs parameter.
+    
+    NEW: Supports rich content in cells (text, images, bullets, headings)
+    by accepting either plain text or a list of block dictionaries.
     """
     
     @staticmethod
@@ -40,8 +43,10 @@ class TableBuilder:
             doc: The python-docx Document object
             placeholder: Placeholder text (unused in current implementation)
             content: Dictionary containing table data with keys:
-                - headers: List of header strings
-                - rows: List of row data (list of lists)
+                - headers: List of header strings or block dictionaries
+                - rows: List of row data (list of lists) where each cell can be:
+                    - Plain text (string)
+                    - List of block dictionaries for rich content
             parent: The parent XML element where content will be inserted
             index: The insertion index within the parent element
             **style_kwargs: Additional styling options including:
@@ -105,28 +110,13 @@ class TableBuilder:
                 if row_height:
                     table.rows[0].height = int(row_height * 914400)  # Convert to EMUs
             
-            for i, header_text in enumerate(headers):
+            for i, header_content in enumerate(headers):
                 cell = row[i]
-                # Handle empty header text - convert to string first to avoid .strip() on integers
-                header_str = str(header_text) if header_text is not None else ""
-                header_display = header_str.strip() if header_str else DEFAULT_EMPTY_VALUE_TEXT
-                
-                # Use shared text processing utility for newline handling
-                header_styles = style_kwargs.get("header_styles") or {}
-                header_style = TextStyle(
-                    bold=True,
-                    align=header_styles.get("align"),
-                    font_color=header_styles.get("font_color")
+                TableBuilder._add_content_to_cell(
+                    cell, header_content, doc, 
+                    style_kwargs.get("header_styles") or {},
+                    is_header=True
                 )
-                
-                add_text_to_cell(
-                    cell, header_display, header_style,
-                    is_empty=(not header_text or not header_str.strip())
-                )
-                
-                # Apply additional header styles
-                if header_styles.get("bg_color"):
-                    _set_cell_bg_color(cell, header_styles["bg_color"])
 
         for row_idx, row_data in enumerate(rows):
             table_row = table.add_row()
@@ -137,35 +127,65 @@ class TableBuilder:
                 if row_height:
                     table_row.height = int(row_height * 914400)  # Convert to EMUs
             
-            for col_idx, cell_val in enumerate(row_data):
+            for col_idx, cell_content in enumerate(row_data):
                 cell = cells[col_idx]
-                # Handle empty cell value - convert to string first to avoid .strip() on integers
-                cell_str = str(cell_val) if cell_val is not None else ""
-                cell_display = cell_str.strip() if cell_str else DEFAULT_EMPTY_VALUE_TEXT
                 
-                # Use shared text processing utility for newline handling
+                # Combine styles (cell-specific has highest priority)
                 col_styles = (style_kwargs.get("column_styles") or {}).get(col_idx, {})
                 row_styles = (style_kwargs.get("row_styles") or {}).get(row_idx, {})
                 cell_styles = (style_kwargs.get("cell_styles") or {}).get((row_idx, col_idx), {})
-                
-                # Combine styles (cell-specific has highest priority)
                 combined_styles = {**col_styles, **row_styles, **cell_styles}
-                cell_style = TextStyle(
-                    bold=combined_styles.get("bold", False),
-                    align=combined_styles.get("align"),
-                    font_color=combined_styles.get("font_color")
-                )
                 
-                add_text_to_cell(
-                    cell, cell_display, cell_style,
-                    is_empty=(not cell_val or not cell_str.strip())
+                TableBuilder._add_content_to_cell(
+                    cell, cell_content, doc, combined_styles, is_header=False
                 )
-                
-                # Apply background color if specified
-                if combined_styles.get("bg_color"):
-                    _set_cell_bg_color(cell, combined_styles["bg_color"])
 
         parent.insert(index, table._element)
+
+    @staticmethod
+    def _add_content_to_cell(cell, content, doc, styles, is_header=False):
+        """
+        Add content to a table cell, supporting both plain text and rich content.
+        
+        Args:
+            cell: The table cell to add content to
+            content: Either a string (plain text) or a list of block dictionaries (rich content)
+            doc: The document object
+            styles: Dictionary of styles to apply
+            is_header: Whether this is a header cell
+        """
+        # Clear existing content
+        for paragraph in cell.paragraphs:
+            p_element = paragraph._element
+            p_element.getparent().remove(p_element)
+        
+        # Check if content is rich (list of block dictionaries)
+        if isinstance(content, list) and len(content) > 0 and isinstance(content[0], dict):
+            # Rich content - use RichTextBuilder
+            # Import here to avoid circular import
+            from docxblocks.builders.rich_text import RichTextBuilder
+            builder = RichTextBuilder(doc, cell._element, 0)
+            builder.render(content)
+        else:
+            # Plain text content - use existing text processing
+            cell_str = str(content) if content is not None else ""
+            cell_display = cell_str.strip() if cell_str else DEFAULT_EMPTY_VALUE_TEXT
+            
+            # Create style object
+            cell_style = TextStyle(
+                bold=is_header or styles.get("bold", False),
+                align=styles.get("align"),
+                font_color=styles.get("font_color")
+            )
+            
+            add_text_to_cell(
+                cell, cell_display, cell_style,
+                is_empty=(not content or not cell_str.strip())
+            )
+            
+            # Apply background color if specified
+            if styles.get("bg_color"):
+                _set_cell_bg_color(cell, styles["bg_color"])
 
 
 def _apply_cell_style(cell, para, run, styles):
@@ -201,8 +221,15 @@ def _set_cell_bg_color(cell, hex_color):
     
     Args:
         cell: The table cell element
-        hex_color: Background color as hex string (e.g., "FF0000")
+        hex_color: Background color as hex string (e.g., "f2f2f2")
     """
-    cell_xml = cell._tc
-    props = cell_xml.get_or_add_tcPr()
-    props.append(parse_xml(f'<w:shd {nsdecls("w")} w:fill="{hex_color}"/>'))
+    # Remove the '#' if present
+    if hex_color.startswith('#'):
+        hex_color = hex_color[1:]
+    
+    # Create the shading XML
+    shading_xml = f'<w:shd {nsdecls("w")} w:fill="{hex_color}"/>'
+    shading_element = parse_xml(shading_xml)
+    
+    # Apply the shading to the cell
+    cell._tc.get_or_add_tcPr().append(shading_element)

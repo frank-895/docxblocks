@@ -1,6 +1,7 @@
 import os
 from docx import Document
 from docxblocks.core.inserter import DocxBuilder
+from PIL import Image
 
 def test_table_block(tmp_path):
     """Test basic table block functionality"""
@@ -214,4 +215,157 @@ def test_table_header_with_double_newlines(tmp_path):
     assert len(paragraphs) == 3
     assert paragraphs[0].text == "Description"
     assert paragraphs[1].text == ""
-    assert paragraphs[2].text == "Details" 
+    assert paragraphs[2].text == "Details"
+
+def test_table_with_rich_cells(tmp_path):
+    """Test that table cells can contain rich content (text, images, bullets, headings)"""
+    template = tmp_path / "template.docx"
+    output = tmp_path / "output.docx"
+    doc = Document()
+    doc.add_paragraph("{{main}}")
+    doc.save(str(template))
+
+    # Create a test image
+    test_image = tmp_path / "test_image.png"
+    img = Image.new('RGB', (100, 50), color='red')
+    img.save(test_image, dpi=(96, 96))
+
+    blocks = [
+        {
+            "type": "table",
+            "content": {
+                "headers": ["Product", "Description", "Features"],
+                "rows": [
+                    [
+                        "Product A",
+                        [
+                            {"type": "text", "text": "High-quality product", "style": {"bold": True}},
+                            {"type": "text", "text": "Available in multiple colors", "style": {"italic": True}}
+                        ],
+                        [
+                            {"type": "bullets", "items": ["Feature 1", "Feature 2", "Feature 3"]}
+                        ]
+                    ],
+                    [
+                        "Product B",
+                        "Simple text description",
+                        [
+                            {"type": "image", "path": str(test_image), "style": {"max_width": "1in"}}
+                        ]
+                    ]
+                ]
+            }
+        }
+    ]
+    
+    builder = DocxBuilder(str(template))
+    builder.insert("{{main}}", blocks)
+    builder.save(str(output))
+
+    assert os.path.exists(output)
+    doc2 = Document(str(output))
+    
+    # Check that table was created
+    tables = doc2.tables
+    assert len(tables) == 1
+    
+    table = tables[0]
+    assert len(table.rows) == 3  # 1 header + 2 data rows
+    assert len(table.columns) == 3
+
+def test_table_with_mixed_cell_content(tmp_path):
+    """Test that tables can have a mix of plain text and rich content cells"""
+    template = tmp_path / "template.docx"
+    output = tmp_path / "output.docx"
+    doc = Document()
+    doc.add_paragraph("{{main}}")
+    doc.save(str(template))
+
+    blocks = [
+        {
+            "type": "table",
+            "content": {
+                "headers": ["Name", "Details", "Status"],
+                "rows": [
+                    [
+                        "Item 1",
+                        [
+                            {"type": "heading", "text": "Item 1", "level": 3},
+                            {"type": "text", "text": "Description with rich content."}
+                        ],
+                        "Active"
+                    ],
+                    [
+                        "Item 2",
+                        "Simple text description",
+                        "Inactive"
+                    ]
+                ]
+            }
+        }
+    ]
+    
+    builder = DocxBuilder(str(template))
+    builder.insert("{{main}}", blocks)
+    builder.save(str(output))
+
+    assert os.path.exists(output)
+    doc2 = Document(str(output))
+    
+    # Check that table was created
+    tables = doc2.tables
+    assert len(tables) == 1
+    
+    table = tables[0]
+    assert len(table.rows) == 3  # 1 header + 2 data rows
+    
+    # Check that mixed content works correctly
+    # First row should have rich content in the details cell
+    details_cell = table.cell(1, 1)  # Row 1, Column 1 (details)
+    assert len(details_cell.paragraphs) > 1  # Should have multiple paragraphs from rich content
+    
+    # Second row should have simple text
+    details_cell2 = table.cell(2, 1)  # Row 2, Column 1 (details)
+    assert len(details_cell2.paragraphs) == 1  # Should have single paragraph for plain text
+
+def test_table_rich_cells_backward_compatibility(tmp_path):
+    """Test that existing plain text cells still work correctly with rich cell support"""
+    template = tmp_path / "template.docx"
+    output = tmp_path / "output.docx"
+    doc = Document()
+    doc.add_paragraph("{{main}}")
+    doc.save(str(template))
+
+    blocks = [
+        {
+            "type": "table",
+            "content": {
+                "headers": ["Name", "Value"],
+                "rows": [
+                    ["Item 1", "100"],
+                    ["Item 2", "200"],
+                    ["Item 3", "300"]
+                ]
+            }
+        }
+    ]
+    
+    builder = DocxBuilder(str(template))
+    builder.insert("{{main}}", blocks)
+    builder.save(str(output))
+
+    assert os.path.exists(output)
+    doc2 = Document(str(output))
+    
+    # Check that table was created
+    tables = doc2.tables
+    assert len(tables) == 1
+    
+    table = tables[0]
+    assert len(table.rows) == 4  # 1 header + 3 data rows
+    
+    # Check that cells contain the expected text (backward compatibility)
+    assert table.cell(1, 0).text.strip() == "Item 1"
+    assert table.cell(1, 1).text.strip() == "100"
+    assert table.cell(2, 0).text.strip() == "Item 2"
+    assert table.cell(2, 1).text.strip() == "200" 

@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.0] - 2025-01-27
+### Added
+- **Rich Content in Table Cells**: Table cells now support rich content including text, images, bullets, and headings
+  - Table cells can contain either plain text (string) or rich content (list of block dictionaries)
+  - **Supported Content Types**: Text blocks with styling, images with sizing constraints, bullet lists, headings (levels 1-6)
+  - **Mixed Content**: Combine multiple block types in a single cell for complex layouts
+  - **Backward Compatibility**: All existing plain text cells continue to work exactly as before
+  - **Seamless Integration**: Rich content uses the same block system and styling as main document content
+
+### Enhanced
+- **TableBuilder**: Extended to detect and handle rich content in cells automatically
+  - Automatically detects whether a cell contains plain text or rich content
+  - Renders rich content using the existing RichTextBuilder for consistency
+  - Maintains all existing table styling and formatting capabilities
+  - Preserves table cell behavior (newlines, inline grouping) for rich content
+
+### Technical Improvements
+- **Content Detection**: Smart detection of cell content type without breaking existing functionality
+- **RichTextBuilder Integration**: Reuses existing rich content rendering system for consistency
+- **Comprehensive Testing**: Added tests for rich content in cells including text, images, bullets, headings, and mixed content
+- **Example Documentation**: Updated table example to demonstrate rich content capabilities
+
+### Documentation
+- **Updated README**: Added comprehensive section on rich content in table cells with examples
+- **Updated STYLEGUIDE**: Added documentation for rich content in table cells
+- **Example Enhancement**: Updated table example to showcase rich content features
+
+---
+
 ## [1.5.1] - 2025-01-27
 ### Fixed
 - **Images in Headers and Footers**: Fixed critical issue where images would not display in headers and footers
