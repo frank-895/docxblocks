@@ -189,7 +189,6 @@ class RichTextBuilder:
         
         ImageBuilder.build(
             self.doc,
-            placeholder=None,
             image_path=block.path,
             parent=self.parent,
             index=self.index,

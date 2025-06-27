@@ -1,5 +1,8 @@
 from docx import Document
 from docxblocks.core.inserter import DocxBuilder
+from PIL import Image
+import tempfile
+import os
 
 # Create a simple template
 doc = Document()
@@ -193,4 +196,97 @@ advanced_blocks = [
 builder2 = DocxBuilder("advanced_header_footer_template.docx")
 builder2.insert("{{content}}", advanced_blocks)
 builder2.save("advanced_header_footer_output.docx")
-print("Advanced Header/Footer example generated: advanced_header_footer_output.docx") 
+print("Advanced Header/Footer example generated: advanced_header_footer_output.docx")
+
+
+# Example 3: Headers and footers with images
+print("\nGenerating header/footer with images example...")
+
+# Create a test image for the example
+with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as tmp_file:
+    img = Image.new('RGB', (150, 50), color='blue')
+    img.save(tmp_file.name, dpi=(96, 96))
+    logo_path = tmp_file.name
+
+# Create another template
+doc3 = Document()
+doc3.add_paragraph("{{content}}")
+doc3.save("header_footer_images_template.docx")
+
+image_blocks = [
+    # Header with image and text
+    {
+        "type": "header",
+        "apply_to": "all",
+        "content": [
+            {
+                "type": "image",
+                "path": logo_path,
+                "style": {"max_width": "1in"}
+            },
+            {
+                "type": "text",
+                "text": "Company Report",
+                "style": {"align": "center", "bold": True, "font_color": "000080"}
+            }
+        ]
+    },
+    
+    # Footer with image
+    {
+        "type": "footer",
+        "apply_to": "all",
+        "content": [
+            {
+                "type": "text",
+                "text": "© 2024 Company",
+                "style": {"align": "left", "font_color": "666666"}
+            },
+            {
+                "type": "image",
+                "path": logo_path,
+                "style": {"max_width": "0.5in"}
+            },
+            {
+                "type": "text",
+                "text": "Page {{page}}",
+                "style": {"align": "right", "font_color": "666666"}
+            }
+        ]
+    },
+    
+    # Main content
+    {
+        "type": "heading",
+        "text": "Header/Footer with Images Demo",
+        "level": 1,
+        "style": {"align": "center"}
+    },
+    {
+        "type": "text",
+        "text": "This document demonstrates headers and footers that contain images. The header includes a company logo and title, while the footer has a smaller logo with page numbers."
+    },
+    {
+        "type": "page_break"
+    },
+    {
+        "type": "heading",
+        "text": "Second Page",
+        "level": 2
+    },
+    {
+        "type": "text",
+        "text": "Notice that the images appear correctly in both the header and footer on all pages."
+    }
+]
+
+# Build the document with images
+builder3 = DocxBuilder("header_footer_images_template.docx")
+builder3.insert("{{content}}", image_blocks)
+builder3.save("header_footer_images_output.docx")
+
+# Clean up the temporary image
+os.unlink(logo_path)
+
+print("Header/Footer with Images example generated: header_footer_images_output.docx")
+print("Note: Images in headers and footers are now fully supported!") 

@@ -47,7 +47,10 @@ class ImageBuilder:
             
         # Handle empty or invalid image path with placeholder
         if not image_path or not image_path.strip() or not os.path.isfile(image_path):
-            para = doc.add_paragraph(DEFAULT_EMPTY_VALUE_TEXT)
+            if hasattr(parent, 'add_paragraph'):
+                para = parent.add_paragraph(DEFAULT_EMPTY_VALUE_TEXT)
+            else:
+                para = doc.add_paragraph(DEFAULT_EMPTY_VALUE_TEXT)
             # Apply placeholder style
             run = para.runs[0]
             run.font.bold = DEFAULT_EMPTY_VALUE_STYLE.get("bold", True)
@@ -56,7 +59,10 @@ class ImageBuilder:
             parent.insert(index, para._element)
             return
 
-        new_para = doc.add_paragraph()
+        if hasattr(parent, 'add_paragraph'):
+            new_para = parent.add_paragraph()
+        else:
+            new_para = doc.add_paragraph()
         run = new_para.add_run()
 
         try:
@@ -83,10 +89,15 @@ class ImageBuilder:
                 else:
                     scale = 1.0
 
-                run.add_picture(image_path, width=Inches(width_in * scale), height=Inches(height_in * scale))
+                # Use file object to ensure embedding works in headers/footers
+                with open(image_path, 'rb') as img_file:
+                    run.add_picture(img_file, width=Inches(width_in * scale), height=Inches(height_in * scale))
 
         except Exception as e:
-            error_para = doc.add_paragraph(DEFAULT_EMPTY_VALUE_TEXT)
+            if hasattr(parent, 'add_paragraph'):
+                error_para = parent.add_paragraph(DEFAULT_EMPTY_VALUE_TEXT)
+            else:
+                error_para = doc.add_paragraph(DEFAULT_EMPTY_VALUE_TEXT)
             # Apply placeholder style
             run = error_para.runs[0]
             run.font.bold = DEFAULT_EMPTY_VALUE_STYLE.get("bold", True)

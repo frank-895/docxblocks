@@ -9,6 +9,7 @@ footers to contain the same content types as the main document.
 from docx.enum.section import WD_HEADER_FOOTER
 from docxblocks.schema.blocks import HeaderBlock, FooterBlock
 from docxblocks.builders.rich_text import RichTextBuilder
+import os
 
 
 class HeaderFooterBuilder:
@@ -106,9 +107,133 @@ class HeaderFooterBuilder:
             p_element = paragraph._element
             p_element.getparent().remove(p_element)
         
-        # Add content using the rich text builder
-        builder = RichTextBuilder(self.doc, header._element, 0)
-        builder.render(content_blocks)
+        # Process content blocks directly using header methods
+        for block in content_blocks:
+            block_type = block.get('type')
+            
+            if block_type == 'text':
+                para = header.add_paragraph()
+                run = para.add_run(block.get('text', ''))
+                # Apply text styling if provided
+                style = block.get('style', {})
+                if style.get('bold'):
+                    run.bold = True
+                if style.get('italic'):
+                    run.italic = True
+                if style.get('font_color'):
+                    from docx.shared import RGBColor
+                    run.font.color.rgb = RGBColor.from_string(style['font_color'])
+                if style.get('align'):
+                    from docx.enum.text import WD_ALIGN_PARAGRAPH
+                    align_map = {
+                        'left': WD_ALIGN_PARAGRAPH.LEFT,
+                        'center': WD_ALIGN_PARAGRAPH.CENTER,
+                        'right': WD_ALIGN_PARAGRAPH.RIGHT,
+                        'justify': WD_ALIGN_PARAGRAPH.JUSTIFY
+                    }
+                    if style['align'] in align_map:
+                        para.alignment = align_map[style['align']]
+                        
+            elif block_type == 'image':
+                para = header.add_paragraph()
+                run = para.add_run()
+                
+                image_path = block.get('path', '')
+                style = block.get('style', {})
+                
+                if image_path and os.path.isfile(image_path):
+                    try:
+                        from PIL import Image as PILImage
+                        from docx.shared import Inches
+                        
+                        with PILImage.open(image_path) as img:
+                            width_px, height_px = img.size
+                            dpi_x, dpi_y = img.info.get("dpi", (72, 72))
+                            width_in = width_px / dpi_x
+                            height_in = height_px / dpi_y
+
+                            # Calculate scale factors for width and height constraints
+                            scales = []
+                            max_width = self._parse_measurement(style.get("max_width"))
+                            max_height = self._parse_measurement(style.get("max_height"))
+
+                            if max_width:
+                                scales.append(max_width / width_in)
+                            if max_height:
+                                scales.append(max_height / height_in)
+                            
+                            # Use the minimum scale to ensure neither dimension exceeds its maximum
+                            if scales:
+                                scale = min(scales)
+                            else:
+                                scale = 1.0
+
+                            # Use file object to ensure embedding works in headers/footers
+                            with open(image_path, 'rb') as img_file:
+                                run.add_picture(img_file, width=Inches(width_in * scale), height=Inches(height_in * scale))
+                                
+                    except Exception as e:
+                        # Add placeholder text if image fails
+                        run.text = "Image could not be loaded"
+                else:
+                    # Add placeholder text for missing image
+                    run.text = "Image not found"
+                    
+            elif block_type == 'heading':
+                para = header.add_paragraph()
+                run = para.add_run(block.get('text', ''))
+                run.bold = True
+                # Apply heading level styling
+                level = block.get('level', 1)
+                if level == 1:
+                    run.font.size = Inches(0.3)  # 18pt
+                elif level == 2:
+                    run.font.size = Inches(0.25)  # 14pt
+                else:
+                    run.font.size = Inches(0.2)  # 12pt
+                    
+            elif block_type == 'table':
+                # For tables, we'll need to implement table creation in headers
+                # This is more complex and may require a different approach
+                para = header.add_paragraph()
+                para.add_run("Table in header - not yet implemented")
+                
+            else:
+                # For other block types, add a placeholder
+                para = header.add_paragraph()
+                para.add_run(f"Block type '{block_type}' not yet supported in headers")
+
+    def _parse_measurement(self, value):
+        """
+        Parse measurement strings and convert to inches.
+        
+        Accepts strings like '4in' or '300px' and returns inches as float.
+        Supports only inches and pixels for now.
+        
+        Args:
+            value: Measurement string (e.g., "4in", "300px") or None
+            
+        Returns:
+            float: Measurement in inches, or None if parsing fails
+        """
+        if not value or not isinstance(value, str):
+            return None
+
+        value = value.strip().lower()
+
+        if value.endswith("in"):
+            try:
+                return float(value.replace("in", ""))
+            except ValueError:
+                return None
+        elif value.endswith("px"):
+            try:
+                px = float(value.replace("px", ""))
+                return px / 96.0  # assuming 96 dpi standard
+            except ValueError:
+                return None
+        else:
+            return None
 
     def _configure_footer(self, footer, content_blocks):
         """
@@ -123,6 +248,98 @@ class HeaderFooterBuilder:
             p_element = paragraph._element
             p_element.getparent().remove(p_element)
         
-        # Add content using the rich text builder
-        builder = RichTextBuilder(self.doc, footer._element, 0)
-        builder.render(content_blocks) 
+        # Process content blocks directly using footer methods
+        for block in content_blocks:
+            block_type = block.get('type')
+            
+            if block_type == 'text':
+                para = footer.add_paragraph()
+                run = para.add_run(block.get('text', ''))
+                # Apply text styling if provided
+                style = block.get('style', {})
+                if style.get('bold'):
+                    run.bold = True
+                if style.get('italic'):
+                    run.italic = True
+                if style.get('font_color'):
+                    from docx.shared import RGBColor
+                    run.font.color.rgb = RGBColor.from_string(style['font_color'])
+                if style.get('align'):
+                    from docx.enum.text import WD_ALIGN_PARAGRAPH
+                    align_map = {
+                        'left': WD_ALIGN_PARAGRAPH.LEFT,
+                        'center': WD_ALIGN_PARAGRAPH.CENTER,
+                        'right': WD_ALIGN_PARAGRAPH.RIGHT,
+                        'justify': WD_ALIGN_PARAGRAPH.JUSTIFY
+                    }
+                    if style['align'] in align_map:
+                        para.alignment = align_map[style['align']]
+                        
+            elif block_type == 'image':
+                para = footer.add_paragraph()
+                run = para.add_run()
+                
+                image_path = block.get('path', '')
+                style = block.get('style', {})
+                
+                if image_path and os.path.isfile(image_path):
+                    try:
+                        from PIL import Image as PILImage
+                        from docx.shared import Inches
+                        
+                        with PILImage.open(image_path) as img:
+                            width_px, height_px = img.size
+                            dpi_x, dpi_y = img.info.get("dpi", (72, 72))
+                            width_in = width_px / dpi_x
+                            height_in = height_px / dpi_y
+
+                            # Calculate scale factors for width and height constraints
+                            scales = []
+                            max_width = self._parse_measurement(style.get("max_width"))
+                            max_height = self._parse_measurement(style.get("max_height"))
+
+                            if max_width:
+                                scales.append(max_width / width_in)
+                            if max_height:
+                                scales.append(max_height / height_in)
+                            
+                            # Use the minimum scale to ensure neither dimension exceeds its maximum
+                            if scales:
+                                scale = min(scales)
+                            else:
+                                scale = 1.0
+
+                            # Use file object to ensure embedding works in headers/footers
+                            with open(image_path, 'rb') as img_file:
+                                run.add_picture(img_file, width=Inches(width_in * scale), height=Inches(height_in * scale))
+                                
+                    except Exception as e:
+                        # Add placeholder text if image fails
+                        run.text = "Image could not be loaded"
+                else:
+                    # Add placeholder text for missing image
+                    run.text = "Image not found"
+                    
+            elif block_type == 'heading':
+                para = footer.add_paragraph()
+                run = para.add_run(block.get('text', ''))
+                run.bold = True
+                # Apply heading level styling
+                level = block.get('level', 1)
+                if level == 1:
+                    run.font.size = Inches(0.3)  # 18pt
+                elif level == 2:
+                    run.font.size = Inches(0.25)  # 14pt
+                else:
+                    run.font.size = Inches(0.2)  # 12pt
+                    
+            elif block_type == 'table':
+                # For tables, we'll need to implement table creation in footers
+                # This is more complex and may require a different approach
+                para = footer.add_paragraph()
+                para.add_run("Table in footer - not yet implemented")
+                
+            else:
+                # For other block types, add a placeholder
+                para = footer.add_paragraph()
+                para.add_run(f"Block type '{block_type}' not yet supported in footers") 
