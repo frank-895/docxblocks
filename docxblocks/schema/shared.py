@@ -19,3 +19,8 @@ class TableStyle(BaseModel):
 class ImageStyle(BaseModel):
     max_width: Optional[str] = None   # E.g. "4in", "300px"
     max_height: Optional[str] = None
+    # Text wrapping properties
+    wrap_text: Optional[Literal["inline", "square", "tight", "through", "top_and_bottom", "behind", "in_front"]] = None
+    horizontal_align: Optional[Literal["left", "center", "right"]] = None
+    vertical_align: Optional[Literal["top", "middle", "bottom"]] = None
+    distance_from_text: Optional[str] = None  # E.g. "0.1in", "10px"

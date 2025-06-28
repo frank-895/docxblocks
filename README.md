@@ -171,52 +171,7 @@ All block types support four alignment options:
 }
 ```
 
-### Rich Content in Table Cells
-
-Table cells can now contain rich content including text, images, bullets, and headings. Each cell can be either:
-- **Plain text** (string) - works as before
-- **Rich content** (list of block dictionaries) - new feature
-
-```python
-{
-    "type": "table",
-    "content": {
-        "headers": ["Product", "Description", "Features", "Image"],
-        "rows": [
-            [
-                "Product A",
-                [
-                    {"type": "heading", "text": "Premium Product", "level": 3},
-                    {"type": "text", "text": "High-quality product with excellent features.", "style": {"italic": True}}
-                ],
-                [
-                    {"type": "bullets", "items": ["Feature 1", "Feature 2", "Feature 3"]}
-                ],
-                [
-                    {"type": "image", "path": "logo.png", "style": {"max_width": "1in"}}
-                ]
-            ],
-            [
-                "Product B",
-                "Simple text description",  # Plain text still works
-                [
-                    {"type": "bullets", "items": ["Basic feature", "Standard quality"]}
-                ],
-                "No image"
-            ]
-        ]
-    }
-}
-```
-
-**Supported Rich Content Types in Cells:**
-- **Text blocks** with styling (bold, italic, color, alignment)
-- **Images** with sizing constraints
-- **Bullet lists** with custom styling
-- **Headings** (levels 1-6) for cell structure
-- **Mixed content** - combine multiple block types in one cell
-
-**Backward Compatibility:** All existing plain text cells continue to work exactly as before.
+**Rich Content in Cells:** Table cells can contain text, images, bullets, and headings. See [STYLEGUIDE.md](STYLEGUIDE.md) for examples.
 
 ### Image Styling
 ```python
@@ -225,19 +180,28 @@ Table cells can now contain rich content including text, images, bullets, and he
     "path": "logo.png",
     "style": {
         "max_width": "4in",
-        "max_height": "300px"
+        "max_height": "300px",
+        "wrap_text": "square",
+        "horizontal_align": "left",
+        "vertical_align": "top",
+        "distance_from_text": "0.1in"
     }
 }
 ```
+
+**Text Wrapping Options:** `inline`, `square`, `tight`, `through`, `top_and_bottom`, `behind`, `in_front`
+
+**Positioning:** `horizontal_align` (left/center/right), `vertical_align` (top/middle/bottom), `distance_from_text`
+
+See [STYLEGUIDE.md](STYLEGUIDE.md) for comprehensive styling examples.
 
 ## 📄 Headers and Footers
 
 DocxBlocks supports customizable headers and footers that can contain any combination of supported block types.
 
-### Basic Headers and Footers
+### Basic Usage
 ```python
 blocks = [
-    # Header for all pages
     {
         "type": "header",
         "apply_to": "all",
@@ -249,11 +213,9 @@ blocks = [
             }
         ]
     },
-    
-    # Footer for all pages
     {
         "type": "footer", 
-        "apply_to": "all",
+        "apply_to": "all_except_first",
         "content": [
             {
                 "type": "text",
@@ -261,123 +223,13 @@ blocks = [
                 "style": {"align": "center", "italic": True}
             }
         ]
-    },
-    
-    # Your main content...
-    {"type": "heading", "text": "Report Title", "level": 1}
-]
-```
-
-### Page-Specific Headers and Footers
-
-Control which pages display specific headers and footers:
-
-```python
-blocks = [
-    # Special header for first page only
-    {
-        "type": "header",
-        "apply_to": "first", 
-        "content": [
-            {
-                "type": "text",
-                "text": "CONFIDENTIAL REPORT",
-                "style": {"align": "center", "bold": True}
-            }
-        ]
-    },
-    
-    # Different headers for odd/even pages (useful for books)
-    {
-        "type": "header",
-        "apply_to": "odd",
-        "content": [
-            {
-                "type": "text", 
-                "text": "Chapter Title\t\tPage {{page}}",
-                "style": {"align": "left"}
-            }
-        ]
-    },
-    
-    {
-        "type": "header",
-        "apply_to": "even",
-        "content": [
-            {
-                "type": "text",
-                "text": "Page {{page}}\t\tBook Title", 
-                "style": {"align": "right"}
-            }
-        ]
     }
 ]
 ```
 
-### Complex Header/Footer Content
+**Apply To Options:** `"all"`, `"all_except_first"`, `"first"`, `"odd"`, `"even"`
 
-Headers and footers can contain any block type:
-
-```python
-{
-    "type": "header",
-    "apply_to": "all",
-    "content": [
-        # Table in header
-        {
-            "type": "table",
-            "content": {
-                "headers": ["Company", "Document", "Date"],
-                "rows": [["ACME Corp", "Annual Report", "2024"]]
-            },
-            "style": {"column_widths": [0.3, 0.4, 0.3]}
-        },
-        # Image in header  
-        {
-            "type": "image",
-            "path": "logo.png",
-            "style": {"max_height": "0.5in"}
-        }
-    ]
-}
-```
-
-### Apply To Options
-
-| Option  | Description                              |
-|---------|------------------------------------------|
-| `"all"` | Apply to all pages (default)            |
-| `"all_except_first"` | Apply to all pages except the first (great for cover pages) |
-| `"first"` | Apply only to the first page           |
-| `"odd"`  | Apply to odd-numbered pages             |
-| `"even"` | Apply to even-numbered pages            |
-
-**Note**: Using `"odd"` or `"even"` automatically enables different odd/even headers throughout the document.
-
-### Cover Page Example
-
-Perfect for reports with clean cover pages:
-
-```python
-blocks = [
-    {
-        "type": "header",
-        "apply_to": "all_except_first",
-        "content": [
-            {
-                "type": "text",
-                "text": "Company Report\tConfidential\tPage {{page}}",
-                "style": {"align": "center"}
-            }
-        ]
-    },
-    # Page 1: Clean cover page (no header/footer)
-    {"type": "heading", "text": "ANNUAL REPORT 2024", "level": 1, "style": {"align": "center"}},
-    {"type": "page_break"},
-    # Page 2+: Content with headers/footers
-    {"type": "heading", "text": "Executive Summary", "level": 1}
-]
-```
+See [STYLEGUIDE.md](STYLEGUIDE.md) for advanced examples including images and tables in headers/footers.
 
 ## 🔧 Advanced Features
 
@@ -432,4 +284,4 @@ MIT License - see LICENSE file for details.
 
 ## 🐛 Issues
 
-Found a bug? Have a feature request? Please open an issue on GitHub. 
+Found a bug? Have a feature request? Please open an issue on GitHub.
