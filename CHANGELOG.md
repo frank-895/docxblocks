@@ -7,7 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.6.1] - 2024-06-27
+## [1.6.2] - 2025-06-28
+### Added
+- **Image Text Wrapping**: Complete text wrapping system for images with professional layout control
+  - **Text Wrapping Modes**: `inline`, `square`, `tight`, `through`, `top_and_bottom`, `behind`, `in_front`
+  - **Positioning Control**: `horizontal_align` (left/center/right), `vertical_align` (top/middle/bottom)
+  - **Distance Control**: `distance_from_text` for customizable spacing around images
+  - **Professional Layouts**: Create sophisticated document layouts with proper image-text interaction
+  - **Universal Support**: Text wrapping works in main content, headers, footers, and table cells
+
+### Enhanced
+- **ImageBuilder**: Extended with comprehensive text wrapping and positioning functionality
+  - XML-based implementation for reliable Word document compatibility
+  - Support for all standard Word text wrapping modes
+  - Automatic handling of image positioning and spacing
+  - Graceful fallback for inline images (wrapping only applies to floating images)
+- **HeaderFooterBuilder**: Added text wrapping support for images in headers and footers
+  - Consistent text wrapping behavior across all document areas
+  - Professional header/footer layouts with wrapped images
+
+### Technical Improvements
+- **Schema Enhancement**: Extended `ImageStyle` with text wrapping properties
+- **XML Manipulation**: Direct manipulation of Word document XML for reliable text wrapping
+- **Measurement Parsing**: Enhanced measurement parsing for distance from text property
+- **Comprehensive Testing**: Added 8 comprehensive tests covering all text wrapping modes and positioning options
+- **Backward Compatibility**: All existing image functionality preserved; new properties are optional
+
+### Documentation
+- **Updated README**: Simplified with essential text wrapping information and reference to STYLEGUIDE
+- **Enhanced STYLEGUIDE**: Added comprehensive text wrapping examples and advanced usage patterns
+- **Example Integration**: Updated image block example to demonstrate text wrapping alongside existing sizing features
+- **Test Coverage**: Full test suite ensuring text wrapping works correctly in all scenarios
+
+---
+
+## [1.6.1] - 2025-06-27
 ### Fixed
 - Robust and predictable styling for rich content in table cells. Cell/row/column/table styles are now merged correctly with block styles, preventing unwanted bold/italic/color bleed.
 
