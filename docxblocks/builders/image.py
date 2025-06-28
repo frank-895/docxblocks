@@ -131,10 +131,10 @@ def _apply_image_wrapping(run, style_kwargs):
     
     # Get the shape element
     shape = run._element.findall('.//wp:anchor', {'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing'})
+    
+    # If no anchor found, the image is inline - convert it to floating
     if not shape:
-        # If no anchor found, the image is inline - we need to convert it to floating
-        # This is a complex operation that requires creating a new anchor element
-        # For now, we'll only apply wrapping to images that are already floating
+        _convert_inline_to_floating(run, style_kwargs)
         return
     
     shape = shape[0]
@@ -154,6 +154,81 @@ def _apply_image_wrapping(run, style_kwargs):
     distance = style_kwargs.get("distance_from_text")
     if distance:
         _set_distance_from_text(shape, distance)
+
+
+def _convert_inline_to_floating(run, style_kwargs):
+    """
+    Convert an inline image to a floating image with text wrapping.
+    
+    Args:
+        run: The run containing the inline image
+        style_kwargs: Style keyword arguments containing wrapping properties
+    """
+    from docx.oxml import parse_xml
+    from docx.shared import Inches
+    
+    # Get the inline image element
+    inline_elem = run._element.find('.//wp:inline', {'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing'})
+    if not inline_elem:
+        return
+    
+    # Get the image dimensions
+    extent = inline_elem.find('.//wp:extent', {'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing'})
+    if extent is not None:
+        cx = extent.get('cx')  # width in EMUs
+        cy = extent.get('cy')  # height in EMUs
+    else:
+        # Default dimensions if not specified
+        cx = "3048000"  # 4 inches in EMUs
+        cy = "2286000"  # 3 inches in EMUs
+    
+    # Create anchor element
+    anchor_xml = f'''
+    <wp:anchor xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" 
+               xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing"
+               distT="0" distB="0" distL="0" distR="0" 
+               simplePos="0" relativeHeight="0" behindDoc="0" locked="0" layoutInCell="1" 
+               allowOverlap="1" wp14:anchorId="12345678" wp14:editId="87654321">
+        <wp:simplePos x="0" y="0"/>
+        <wp:positionH relativeFrom="column">
+            <wp:posOffset>0</wp:posOffset>
+        </wp:positionH>
+        <wp:positionV relativeFrom="paragraph">
+            <wp:posOffset>0</wp:posOffset>
+        </wp:positionV>
+        <wp:extent cx="{cx}" cy="{cy}"/>
+        <wp:effectExtent l="0" t="0" r="0" b="0"/>
+        <wp:wrap type="square"/>
+        <wp:docPr id="1" name="Picture 1"/>
+        <wp:cNvGraphicFramePr/>
+    </wp:anchor>
+    '''
+    
+    anchor_elem = parse_xml(anchor_xml)
+    
+    # Copy the drawing element from inline to anchor
+    drawing = inline_elem.find('.//a:graphic', {'a': 'http://schemas.openxmlformats.org/drawingml/2006/main'})
+    if drawing is not None:
+        anchor_elem.append(drawing)
+    
+    # Replace the inline element with anchor
+    parent = inline_elem.getparent()
+    if parent is not None:
+        parent.replace(inline_elem, anchor_elem)
+    
+    # Now apply the text wrapping and positioning
+    wrap_text = style_kwargs.get("wrap_text")
+    if wrap_text:
+        _set_text_wrapping(anchor_elem, wrap_text)
+    
+    horizontal_align = style_kwargs.get("horizontal_align")
+    vertical_align = style_kwargs.get("vertical_align")
+    if horizontal_align or vertical_align:
+        _set_image_positioning(anchor_elem, horizontal_align, vertical_align)
+    
+    distance = style_kwargs.get("distance_from_text")
+    if distance:
+        _set_distance_from_text(anchor_elem, distance)
 
 
 def _set_text_wrapping(shape, wrap_mode):

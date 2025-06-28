@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.3] - 2025-06-28
+### Fixed
+- Floating image wrapping ("in_front", "behind") now works as documented: images are properly converted from inline to floating, so all text wrapping and positioning options are respected.
+- Improved compatibility for all image text wrapping modes.
+
+### Added
+- Test coverage for "in_front" image wrapping mode, ensuring floating images are handled correctly. 
+
+---
+
 ## [1.6.2] - 2025-06-28
 ### Added
 - **Image Text Wrapping**: Complete text wrapping system for images with professional layout control

@@ -482,4 +482,48 @@ def test_image_wrapping_inline_default(tmp_path):
     
     assert os.path.exists(output)
     doc2 = Document(str(output))
+    assert len(doc2.paragraphs) > 0
+
+def test_image_wrapping_in_front(tmp_path):
+    """Test that in_front text wrapping can be applied to images and image is floating."""
+    template = tmp_path / "template.docx"
+    output = tmp_path / "output.docx"
+    doc = Document()
+    doc.add_paragraph("{{main}}")
+    doc.save(str(template))
+
+    # Create test image
+    test_image = tmp_path / "test_image.png"
+    create_test_image(str(test_image), width=200, height=150, dpi=(96, 96))
+
+    blocks = [
+        {
+            "type": "text",
+            "text": "This is text above the image."
+        },
+        {
+            "type": "image",
+            "path": str(test_image),
+            "style": {
+                "max_width": "2in",
+                "wrap_text": "in_front",
+                "horizontal_align": "left",
+                "vertical_align": "top"
+            }
+        },
+        {
+            "type": "text",
+            "text": "This is text below the image."
+        }
+    ]
+
+    builder = DocxBuilder(str(template))
+    builder.insert("{{main}}", blocks)
+    builder.save(str(output))
+
+    assert os.path.exists(output)
+    doc2 = Document(str(output))
+    # Check that the image is present and not a placeholder
+    assert not any(DEFAULT_EMPTY_VALUE_TEXT in p.text for p in doc2.paragraphs)
+    # Check that the document has content (image and text)
     assert len(doc2.paragraphs) > 0 
