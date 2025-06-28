@@ -169,7 +169,7 @@ def _convert_inline_to_floating(run, style_kwargs):
     
     # Get the inline image element
     inline_elem = run._element.find('.//wp:inline', {'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing'})
-    if not inline_elem:
+    if inline_elem is None:
         return
     
     # Get the image dimensions
@@ -182,53 +182,99 @@ def _convert_inline_to_floating(run, style_kwargs):
         cx = "3048000"  # 4 inches in EMUs
         cy = "2286000"  # 3 inches in EMUs
     
-    # Create anchor element
-    anchor_xml = f'''
-    <wp:anchor xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" 
-               xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing"
-               distT="0" distB="0" distL="0" distR="0" 
-               simplePos="0" relativeHeight="0" behindDoc="0" locked="0" layoutInCell="1" 
-               allowOverlap="1" wp14:anchorId="12345678" wp14:editId="87654321">
-        <wp:simplePos x="0" y="0"/>
-        <wp:positionH relativeFrom="column">
-            <wp:posOffset>0</wp:posOffset>
-        </wp:positionH>
-        <wp:positionV relativeFrom="paragraph">
-            <wp:posOffset>0</wp:posOffset>
-        </wp:positionV>
-        <wp:extent cx="{cx}" cy="{cy}"/>
-        <wp:effectExtent l="0" t="0" r="0" b="0"/>
-        <wp:wrap type="square"/>
-        <wp:docPr id="1" name="Picture 1"/>
-        <wp:cNvGraphicFramePr/>
-    </wp:anchor>
-    '''
-    
-    anchor_elem = parse_xml(anchor_xml)
-    
-    # Copy the drawing element from inline to anchor
+    # Get the drawing element before removing inline
     drawing = inline_elem.find('.//a:graphic', {'a': 'http://schemas.openxmlformats.org/drawingml/2006/main'})
-    if drawing is not None:
-        anchor_elem.append(drawing)
+    if drawing is None:
+        return
     
-    # Replace the inline element with anchor
-    parent = inline_elem.getparent()
-    if parent is not None:
-        parent.replace(inline_elem, anchor_elem)
+    # Create anchor element with proper namespaces
+    anchor_xml = f'''<wp:anchor xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" 
+           xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing"
+           xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"
+           xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+           distT="0" distB="0" distL="0" distR="0" 
+           simplePos="0" relativeHeight="0" behindDoc="0" locked="0" layoutInCell="1" 
+           allowOverlap="1" wp14:anchorId="12345678" wp14:editId="87654321">
+    <wp:simplePos x="0" y="0"/>
+    <wp:positionH relativeFrom="column">
+        <wp:posOffset>0</wp:posOffset>
+    </wp:positionH>
+    <wp:positionV relativeFrom="paragraph">
+        <wp:posOffset>0</wp:posOffset>
+    </wp:positionV>
+    <wp:extent cx="{cx}" cy="{cy}"/>
+    <wp:effectExtent l="0" t="0" r="0" b="0"/>
+    <wp:wrap type="square"/>
+    <wp:docPr id="1" name="Picture 1"/>
+    <wp:cNvGraphicFramePr/>
+    <a:graphic>
+        <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">
+            <pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
+                <pic:nvPicPr>
+                    <pic:cNvPr id="0" name="Picture"/>
+                    <pic:cNvPicPr/>
+                </pic:nvPicPr>
+                <pic:blipFill>
+                    <a:blip r:embed="rId1"/>
+                    <a:stretch>
+                        <a:fillRect/>
+                    </a:stretch>
+                </pic:blipFill>
+                <pic:spPr>
+                    <a:xfrm>
+                        <a:off x="0" y="0"/>
+                        <a:ext cx="{cx}" cy="{cy}"/>
+                    </a:xfrm>
+                    <a:prstGeom prst="rect">
+                        <a:avLst/>
+                    </a:prstGeom>
+                </pic:spPr>
+            </pic:pic>
+        </a:graphicData>
+    </a:graphic>
+</wp:anchor>'''
     
-    # Now apply the text wrapping and positioning
-    wrap_text = style_kwargs.get("wrap_text")
-    if wrap_text:
-        _set_text_wrapping(anchor_elem, wrap_text)
-    
-    horizontal_align = style_kwargs.get("horizontal_align")
-    vertical_align = style_kwargs.get("vertical_align")
-    if horizontal_align or vertical_align:
-        _set_image_positioning(anchor_elem, horizontal_align, vertical_align)
-    
-    distance = style_kwargs.get("distance_from_text")
-    if distance:
-        _set_distance_from_text(anchor_elem, distance)
+    try:
+        anchor_elem = parse_xml(anchor_xml)
+        
+        # Copy the actual drawing content from the original inline element
+        # Find the picture element in the original drawing
+        original_pic = drawing.find('.//pic:pic', {'pic': 'http://schemas.openxmlformats.org/drawingml/2006/picture'})
+        if original_pic is not None:
+            # Replace the placeholder graphic with the actual one
+            new_graphic = anchor_elem.find('.//a:graphic', {'a': 'http://schemas.openxmlformats.org/drawingml/2006/main'})
+            if new_graphic is not None:
+                # Clear the placeholder content
+                for child in list(new_graphic):
+                    new_graphic.remove(child)
+                # Copy the actual graphic data
+                graphic_data = drawing.find('.//a:graphicData', {'a': 'http://schemas.openxmlformats.org/drawingml/2006/main'})
+                if graphic_data is not None:
+                    new_graphic.append(graphic_data)
+        
+        # Replace the inline element with anchor
+        parent = inline_elem.getparent()
+        if parent is not None:
+            parent.replace(inline_elem, anchor_elem)
+        
+        # Now apply the text wrapping and positioning
+        wrap_text = style_kwargs.get("wrap_text")
+        if wrap_text:
+            _set_text_wrapping(anchor_elem, wrap_text)
+        
+        horizontal_align = style_kwargs.get("horizontal_align")
+        vertical_align = style_kwargs.get("vertical_align")
+        if horizontal_align or vertical_align:
+            _set_image_positioning(anchor_elem, horizontal_align, vertical_align)
+        
+        distance = style_kwargs.get("distance_from_text")
+        if distance:
+            _set_distance_from_text(anchor_elem, distance)
+            
+    except Exception as e:
+        # If conversion fails, log the error but don't break the document
+        print(f"Warning: Failed to convert inline image to floating: {e}")
+        return
 
 
 def _set_text_wrapping(shape, wrap_mode):
@@ -250,7 +296,10 @@ def _set_text_wrapping(shape, wrap_mode):
         "in_front": "inFront"
     }
     
-    if wrap_mode in wrap_map:
+    if wrap_mode not in wrap_map:
+        return
+    
+    try:
         # Find or create the wrap element
         wrap_elem = shape.find('.//wp:wrap', {'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing'})
         if wrap_elem is None:
@@ -262,6 +311,9 @@ def _set_text_wrapping(shape, wrap_mode):
         else:
             # Update existing wrap element
             wrap_elem.set('type', wrap_map[wrap_mode])
+    except Exception as e:
+        print(f"Warning: Failed to set text wrapping: {e}")
+        return
 
 
 def _set_image_positioning(shape, horizontal_align, vertical_align):
@@ -286,21 +338,25 @@ def _set_image_positioning(shape, horizontal_align, vertical_align):
         "bottom": "bottom"
     }
     
-    # Apply horizontal alignment
-    if horizontal_align and horizontal_align in horizontal_map:
-        pos_h = shape.find('.//wp:positionH', {'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing'})
-        if pos_h is not None:
-            align_elem = pos_h.find('.//wp:align', {'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing'})
-            if align_elem is not None:
-                align_elem.text = horizontal_map[horizontal_align]
-    
-    # Apply vertical alignment
-    if vertical_align and vertical_align in vertical_map:
-        pos_v = shape.find('.//wp:positionV', {'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing'})
-        if pos_v is not None:
-            align_elem = pos_v.find('.//wp:align', {'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing'})
-            if align_elem is not None:
-                align_elem.text = vertical_map[vertical_align]
+    try:
+        # Apply horizontal alignment
+        if horizontal_align and horizontal_align in horizontal_map:
+            pos_h = shape.find('.//wp:positionH', {'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing'})
+            if pos_h is not None:
+                align_elem = pos_h.find('.//wp:align', {'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing'})
+                if align_elem is not None:
+                    align_elem.text = horizontal_map[horizontal_align]
+        
+        # Apply vertical alignment
+        if vertical_align and vertical_align in vertical_map:
+            pos_v = shape.find('.//wp:positionV', {'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing'})
+            if pos_v is not None:
+                align_elem = pos_v.find('.//wp:align', {'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing'})
+                if align_elem is not None:
+                    align_elem.text = vertical_map[vertical_align]
+    except Exception as e:
+        print(f"Warning: Failed to set image positioning: {e}")
+        return
 
 
 def _set_distance_from_text(shape, distance):
@@ -311,22 +367,26 @@ def _set_distance_from_text(shape, distance):
         shape: The shape element
         distance: Distance string (e.g., "0.1in", "10px")
     """
-    # Parse the distance
-    distance_in = _parse_measurement(distance)
-    if distance_in is None:
+    try:
+        # Parse the distance
+        distance_in = _parse_measurement(distance)
+        if distance_in is None:
+            return
+        
+        # Convert to EMUs (Excel Metric Units - 1 inch = 914400 EMUs)
+        distance_emu = int(distance_in * 914400)
+        
+        # Apply to wrap margins
+        wrap_elem = shape.find('.//wp:wrap', {'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing'})
+        if wrap_elem is not None:
+            # Set all margins to the specified distance
+            for margin in ['left', 'right', 'top', 'bottom']:
+                margin_elem = wrap_elem.find(f'.//wp:{margin}', {'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing'})
+                if margin_elem is not None:
+                    margin_elem.text = str(distance_emu)
+    except Exception as e:
+        print(f"Warning: Failed to set distance from text: {e}")
         return
-    
-    # Convert to EMUs (Excel Metric Units - 1 inch = 914400 EMUs)
-    distance_emu = int(distance_in * 914400)
-    
-    # Apply to wrap margins
-    wrap_elem = shape.find('.//wp:wrap', {'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing'})
-    if wrap_elem is not None:
-        # Set all margins to the specified distance
-        for margin in ['left', 'right', 'top', 'bottom']:
-            margin_elem = wrap_elem.find(f'.//wp:{margin}', {'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing'})
-            if margin_elem is not None:
-                margin_elem.text = str(distance_emu)
 
 
 def _parse_measurement(value):
