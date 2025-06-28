@@ -7,7 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.4] - 2025-06-28
+
+### Fixed
+- Fixed XML namespace and structure issues for floating image wrapping, preventing Word from reporting file corruption.
+- Ensured all generated .docx files open correctly in Microsoft Word and pass programmatic validation.
+- Improved error handling and robustness in image XML generation (wrapping, positioning, and distance from text).
+- Added missing `xmlns:r` namespace for image embedding, resolving compatibility with all text wrapping modes.
+
+---
+
 ## [1.6.3] - 2025-06-28
+
 ### Fixed
 - Floating image wrapping ("in_front", "behind") now works as documented: images are properly converted from inline to floating, so all text wrapping and positioning options are respected.
 - Improved compatibility for all image text wrapping modes.
