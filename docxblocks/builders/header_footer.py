@@ -80,10 +80,10 @@ class HeaderFooterBuilder:
             section: The document section
             apply_to: The application rule
         """
-        if apply_to == "all_except_first":
+        if apply_to in ["first", "all_except_first"]:
             section.different_first_page_header_footer = True
         elif apply_to in ["odd", "even"]:
-            section.odd_and_even_pages_header_footer = True
+            self.doc.settings.odd_and_even_pages_header_footer = True
     
     def _configure_footer_application(self, section, apply_to):
         """
@@ -93,10 +93,10 @@ class HeaderFooterBuilder:
             section: The document section
             apply_to: The application rule
         """
-        if apply_to == "all_except_first":
+        if apply_to in ["first", "all_except_first"]:
             section.different_first_page_header_footer = True
         elif apply_to in ["odd", "even"]:
-            section.odd_and_even_pages_header_footer = True
+            self.doc.settings.odd_and_even_pages_header_footer = True
     
     def _get_header_for_rule(self, section, apply_to):
         """
