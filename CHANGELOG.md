@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.5] - 2025-06-28
+
+### Fixed
+- **Rollback to stable functionality**: Reverted problematic text wrapping implementation that was causing Word document corruption
+- **Restored clean image handling**: Removed complex XML manipulation that was causing file corruption issues
+- **Stable document generation**: All generated .docx files now open correctly in Microsoft Word without corruption
+
+### Removed
+- **Text wrapping functionality**: Removed `wrap_text`, `horizontal_align`, `vertical_align`, and `distance_from_text` properties
+- **Complex XML manipulation**: Removed error-prone inline-to-floating image conversion code
+- **Problematic features**: Removed features that were causing Word to report file corruption
+
+### Technical
+- **Clean codebase**: Back to stable v1.6.1 functionality with only `max_width` and `max_height` for images
+- **All tests passing**: 57/57 tests passing with clean, reliable functionality
+- **Backward compatibility**: All existing functionality preserved (text, tables, headers/footers, rich cells, etc.)
+
+**Note**: This version provides a stable, reliable base. Text wrapping functionality may be re-implemented in future versions using a more robust approach.
+
+---
+
 ## [1.6.1] - 2024-06-27
 ### Fixed
 - Robust and predictable styling for rich content in table cells. Cell/row/column/table styles are now merged correctly with block styles, preventing unwanted bold/italic/color bleed.
