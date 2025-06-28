@@ -76,17 +76,30 @@ Table cells can contain either plain text (string) or rich content (list of bloc
 {
     "type": "table",
     "content": {
-        "headers": ["Product", "Description", "Features"],
+        "headers": ["Product", "Description", "Features", "Image"],
         "rows": [
             [
                 "Product A",
                 [
                     {"type": "heading", "text": "Premium Product", "level": 3},
-                    {"type": "text", "text": "High-quality product.", "style": {"italic": True}},
-                    {"type": "image", "path": "logo.png", "style": {"max_width": "1in"}},
-                    {"type": "bullets", "items": ["Feature 1", "Feature 2"]}
+                    {"type": "text", "text": "High-quality product with excellent features.", "style": {"italic": True}},
+                    {"type": "image", "path": "logo.png", "style": {"max_width": "1in", "wrap_text": "inline"}},
+                    {"type": "bullets", "items": ["Feature 1", "Feature 2", "Feature 3"]}
                 ],
-                "Simple text cell"
+                [
+                    {"type": "bullets", "items": ["Advanced feature 1", "Advanced feature 2"]}
+                ],
+                [
+                    {"type": "image", "path": "product_a.png", "style": {"max_width": "1.5in", "wrap_text": "square"}}
+                ]
+            ],
+            [
+                "Product B",
+                "Simple text description",  # Plain text still works
+                [
+                    {"type": "bullets", "items": ["Basic feature", "Standard quality"]}
+                ],
+                "No image"
             ]
         ]
     }
@@ -94,11 +107,13 @@ Table cells can contain either plain text (string) or rich content (list of bloc
 ```
 
 **Supported Rich Content Types in Cells:**
-- Text blocks with styling (bold, italic, color, alignment)
-- Images with sizing constraints
-- Bullet lists with custom styling
-- Headings (levels 1-6) for cell structure
-- Mixed content - combine multiple block types in one cell
+- **Text blocks** with styling (bold, italic, color, alignment)
+- **Images** with sizing constraints and text wrapping
+- **Bullet lists** with custom styling
+- **Headings** (levels 1-6) for cell structure
+- **Mixed content** - combine multiple block types in one cell
+
+**Backward Compatibility:** All existing plain text cells continue to work exactly as before.
 
 ### Images
 ```python
@@ -107,7 +122,60 @@ Table cells can contain either plain text (string) or rich content (list of bloc
     "path": "path/to/image.jpg",
     "style": {
         "max_width": "4in",
-        "max_height": "300px"
+        "max_height": "300px",
+        "wrap_text": "square",
+        "horizontal_align": "left",
+        "vertical_align": "top",
+        "distance_from_text": "0.1in"
+    }
+}
+```
+
+#### Text Wrapping Modes
+- `"inline"`: Image flows with text (default behavior)
+- `"square"`: Text wraps around rectangular boundary
+- `"tight"`: Text follows image contours more closely
+- `"through"`: Text flows through image areas
+- `"top_and_bottom"`: Image between paragraphs, no side text
+- `"behind"`: Image behind text (background effect)
+- `"in_front"`: Image in front of text (overlay effect)
+
+#### Positioning Options
+- `horizontal_align`: "left", "center", "right"
+- `vertical_align`: "top", "middle", "bottom"
+- `distance_from_text`: Spacing around image (e.g., "0.1in", "10px")
+
+#### Text Wrapping Examples
+
+```python
+# Inline wrapping (default) - image flows with text
+{"type": "image", "path": "icon.png", "style": {"wrap_text": "inline"}}
+
+# Square wrapping - text flows around rectangular boundary
+{"type": "image", "path": "photo.jpg", "style": {"wrap_text": "square", "horizontal_align": "left"}}
+
+# Tight wrapping - text follows image contours
+{"type": "image", "path": "logo.png", "style": {"wrap_text": "tight", "horizontal_align": "right"}}
+
+# Top and bottom - image between paragraphs
+{"type": "image", "path": "banner.png", "style": {"wrap_text": "top_and_bottom", "horizontal_align": "center"}}
+
+# Behind text - image as background
+{"type": "image", "path": "watermark.png", "style": {"wrap_text": "behind", "horizontal_align": "center"}}
+
+# In front of text - image overlays text
+{"type": "image", "path": "stamp.png", "style": {"wrap_text": "in_front"}}
+
+# Combined example with positioning and distance
+{
+    "type": "image",
+    "path": "company_logo.png",
+    "style": {
+        "max_width": "2.5in",
+        "wrap_text": "square",
+        "horizontal_align": "right",
+        "vertical_align": "top",
+        "distance_from_text": "0.15in"
     }
 }
 ```
@@ -154,6 +222,116 @@ Table cells can contain either plain text (string) or rich content (list of bloc
         }
     ]
 }
+```
+
+#### Advanced Header/Footer Examples
+
+**Header with Image and Text Wrapping:**
+```python
+{
+    "type": "header",
+    "apply_to": "all",
+    "content": [
+        {
+            "type": "image",
+            "path": "logo.png",
+            "style": {
+                "max_width": "1.5in",
+                "wrap_text": "square",
+                "horizontal_align": "right"
+            }
+        },
+        {
+            "type": "text",
+            "text": "Company Report",
+            "style": {"align": "left", "bold": True}
+        }
+    ]
+}
+```
+
+**Footer with Table and Styling:**
+```python
+{
+    "type": "footer",
+    "apply_to": "all_except_first",
+    "content": [
+        {
+            "type": "table",
+            "content": {
+                "headers": ["Company", "Document", "Date"],
+                "rows": [["ACME Corp", "Annual Report", "2024"]]
+            },
+            "style": {
+                "column_widths": [0.3, 0.4, 0.3],
+                "header_styles": {"bold": True, "font_color": "666666"}
+            }
+        }
+    ]
+}
+```
+
+**Page-Specific Headers:**
+```python
+# Special header for first page only
+{
+    "type": "header",
+    "apply_to": "first", 
+    "content": [
+        {
+            "type": "text",
+            "text": "CONFIDENTIAL REPORT",
+            "style": {"align": "center", "bold": True}
+        }
+    ]
+}
+
+# Different headers for odd/even pages (useful for books)
+{
+    "type": "header",
+    "apply_to": "odd",
+    "content": [
+        {
+            "type": "text", 
+            "text": "Chapter Title\t\tPage {{page}}",
+            "style": {"align": "left"}
+        }
+    ]
+}
+
+{
+    "type": "header",
+    "apply_to": "even",
+    "content": [
+        {
+            "type": "text",
+            "text": "Page {{page}}\t\tBook Title", 
+            "style": {"align": "right"}
+        }
+    ]
+}
+```
+
+**Cover Page Example:**
+```python
+blocks = [
+    {
+        "type": "header",
+        "apply_to": "all_except_first",
+        "content": [
+            {
+                "type": "text",
+                "text": "Company Report\tConfidential\tPage {{page}}",
+                "style": {"align": "center"}
+            }
+        ]
+    },
+    # Page 1: Clean cover page (no header/footer)
+    {"type": "heading", "text": "ANNUAL REPORT 2024", "level": 1, "style": {"align": "center"}},
+    {"type": "page_break"},
+    # Page 2+: Content with headers/footers
+    {"type": "heading", "text": "Executive Summary", "level": 1}
+]
 ```
 
 ## Styling Options
