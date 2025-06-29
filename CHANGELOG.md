@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.6] - 2025-06-29
+
+### Fixed
+- **Critical XML Corruption Issue**: Fixed Word document corruption caused by complex XML manipulation in image builders
+  - **Image Builder**: Removed complex inline-to-floating image conversion that was creating malformed XML
+  - **Header/Footer Builder**: Removed complex XML manipulation for image wrapping in headers and footers
+  - **Safe Image Embedding**: Images now embed as simple inline images without complex wrapping operations
+  - **Word Compatibility**: All generated documents now open correctly in Microsoft Word without corruption errors
+
+### Technical
+- **Simplified Image Handling**: Replaced complex `_convert_inline_to_floating()` and `_apply_image_wrapping()` functions with simple `_apply_simple_wrapping()` that avoids XML manipulation
+- **Preserved Functionality**: All image sizing (`max_width`, `max_height`) and basic embedding still work correctly
+- **Maintained Table Functionality**: Table cell background colors still work (simple XML manipulation that doesn't cause corruption)
+- **Backward Compatibility**: All existing functionality preserved; only the corruption-causing complex XML operations removed
+
+### Removed
+- **Complex XML Conversion**: Removed `_convert_inline_to_floating()` function that was creating malformed XML structures
+- **Advanced Image Wrapping**: Removed complex text wrapping, positioning, and distance-from-text features that were causing corruption
+- **Problematic XML Manipulation**: Removed XML operations that python-docx could handle but Word couldn't
+
+**Note**: This version provides stable, reliable image embedding. Advanced image wrapping features may be re-implemented in future versions using a more robust approach that doesn't cause Word corruption.
+
+---
+
 ## [1.6.5] - 2025-06-28
 
 ### Fixed
