@@ -3,6 +3,7 @@ from docxblocks.core.inserter import DocxBuilder
 from PIL import Image
 import tempfile
 import os
+import atexit
 
 # Create a test image for the example
 with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as tmp_file:
@@ -101,8 +102,8 @@ builder = DocxBuilder("table_block_template.docx")
 builder.insert("{{main}}", blocks)
 builder.save("table_block_output.docx")
 
-# Clean up the temporary image
-os.unlink(logo_path)
+# Register cleanup at program exit
+atexit.register(lambda: os.path.exists(logo_path) and os.unlink(logo_path))
 
 print("Table block example generated: table_block_output.docx")
 print("This example demonstrates both basic tables and rich content in cells!") 
